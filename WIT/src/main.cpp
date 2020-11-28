@@ -19,18 +19,17 @@ LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 
 
 /*  Make the class name into a global variable  */
-TCHAR szClassName[] = _T("WIT");
-TCHAR szTitle[] = _T("WIT - logowanie");
-TCHAR textsave[] = _T("");
+TCHAR szClassName[] = L"WIT";
+TCHAR szTitle[] = L"WIT - logowanie";
+TCHAR textsave[] = L"";
 
 
 HWND g_hEdit, g_hButW, g_hButC, hFout, button, TextBox;
 
 int WINAPI WinMain(HINSTANCE hThisInstance,
-    
-    HINSTANCE hPrevInstance,
-    LPSTR lpszArgument,
-    int nCmdShow)
+                   HINSTANCE hPrevInstance,
+                   LPSTR lpszArgument,
+                   int nCmdShow)
 {
     HWND hwnd;               /* This is the handle for our window */
     MSG messages;            /* Here messages to the application are saved */
@@ -60,10 +59,9 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
     /*  Create console window  */
     CreateConsole();
    
-    print(szClassName);
-    print(std::string("dupa"));
-
-    //print(T2str(szClassName));
+    printT(szClassName);
+    print(T2str(szClassName));
+    
  
 
     /* The class is registered, let's create the program*/
@@ -111,47 +109,56 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 
 /*  This function is called by the Windows function DispatchMessage()  */
 
+void myTextOut(HDC hdc, int x, int y, const wchar_t* text)
+{
+    if (!text)
+        return;
+    TextOut(hdc, x, y, text, wcslen(text));
+}
+
+
+
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)                  /* handle the messages */
     {
     case WM_CREATE:
-        
-                 button=CreateWindow(_T("BUTTON"),
-                                     _T("Przyc 1"),
+
+                 button=CreateWindow(L"BUTTON",
+                                     L"Przyc 1",
                                      WS_CHILD | WS_VISIBLE | BS_FLAT,
                                      10, 10, 100, 20,
                                      hwnd, (HMENU) 1, NULL, NULL);
-                 button=CreateWindow(_T("BUTTON"),
-                                     _T("Przyc 2"),
+                 button=CreateWindow(L"BUTTON",
+                                     L"Przyc 2",
                                      WS_CHILD | WS_VISIBLE | BS_FLAT,
                                      10, 40, 100, 20,
                                      hwnd, (HMENU) 2, NULL, NULL);
-                 TextBox=CreateWindow(_T("EDIT"),
-                                      _T(""),
+                 TextBox=CreateWindow(L"EDIT",
+                                      L"",
                                       WS_CHILD | WS_VISIBLE | WS_BORDER,
                                       10, 80, 100, 20,
                                       hwnd, NULL, NULL, NULL);
-                 button=CreateWindow(_T("BUTTON"),
-                                       _T("GO"),
+                 button=CreateWindow(L"BUTTON",
+                                       L"GO",
                                        WS_CHILD | WS_VISIBLE | BS_FLAT,
                                        10, 110, 100, 20,
                                        hwnd, (HMENU)3, NULL, NULL);
                  
-            /*g_hEdit = CreateWindowEx(WS_EX_CLIENTEDGE, (LPCWSTR)_T("EDIT"), NULL,
+            /*g_hEdit = CreateWindowEx(WS_EX_CLIENTEDGE, (LPCWSTR)L"EDIT", NULL,
                 WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
                 10, 10, 300, 100, hwnd, NULL, NULL, NULL);
             if (!g_hEdit)
                 SendMessage(hwnd, WM_CLOSE, NULL, NULL);
 
-            SetWindowText(g_hEdit, _T("Wpisz tu coœ..."));
+            SetWindowText(g_hEdit, L"Wpisz tu coœ...");
 
-            g_hButW = CreateWindowEx(WS_EX_CLIENTEDGE, (LPCWSTR)_T("BUTTON"), _T("Zapisz tekst"),
+            g_hButW = CreateWindowEx(WS_EX_CLIENTEDGE, (LPCWSTR)L"BUTTON", L"Zapisz tekst",
                 WS_CHILD | WS_VISIBLE | WS_BORDER, 10, 150, 150, 30,
                 hwnd, (HMENU)ID_BUTTON_WRITE, NULL, NULL);
             if (!g_hButW) SendMessage(hwnd, WM_CLOSE, NULL, NULL);
 
-            g_hButC = CreateWindowEx(WS_EX_CLIENTEDGE, (LPCWSTR)_T("BUTTON"), _T("WyjdŸ"),
+            g_hButC = CreateWindowEx(WS_EX_CLIENTEDGE, (LPCWSTR)L"BUTTON", L"WyjdŸ",
                 WS_CHILD | WS_VISIBLE | WS_BORDER, 200, 150, 150, 30,
                 hwnd, (HMENU)ID_BUTTON_CLOSE, NULL, NULL);
             if (!g_hButC) SendMessage(hwnd, WM_CLOSE, NULL, NULL);
@@ -172,10 +179,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
         switch (wParam) {
         case 1:
-            ::MessageBox(hwnd, _T("Przyc 1"), _T(""), MB_OK);
+            ::MessageBox(hwnd, L"Przyc 1", L"", MB_OK);
             break;
         case 2:
-            ::MessageBox(hwnd, _T("Przyc 2"), _T(""), MB_OK);
+            ::MessageBox(hwnd, L"Przyc 2", L"", MB_OK);
             break;
         case 3:
             int gwtstat = 0;
@@ -188,13 +195,74 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
         }
         break;
 
+    case WM_LBUTTONDOWN: {
+        auto x = (int16_t)(lParam & 0xffff);
+        auto y = (int16_t)(lParam >> 16 & 0xffff);
+        printf("Left Button Down %d %d\n", x, y);
+
+        HDC hdc = GetDC(hwnd);
+
+        //Rectangle(hdc, x, y, x + 5, y + 20);
+        //TextOut(hdc, x, y, L"Hallo", 10);
+        //myTextOut(hdc, x, y, L"Marcin");
+        //myTextOut(hdc, x, y + 20, L"Lesniewski");
+       
+        //POINT pt;
+        //MoveToEx(hdc, x, y, &pt);
+        //LineTo(hdc, x+10, y+10);
+        //LineDDA(50, 50, x, y,);
+
+        /*for (int j = 0; j < 256; j++) {
+            for (int i = 0; i < 256; i++) {
+                COLORREF color = RGB(i, j, 0);
+                SetPixel(hdc, x+i, y+j, color);
+            }
+        }*/
         
+        /*HBRUSH brush=CreateSolidBrush(RGB(0, 100, 255));
+        SelectObject(hdc, brush);
+        Rectangle(hdc, x - 25, y - 25, x + 25, y + 25);
+        DeleteObject(brush);*/
+
+        
+        /*HBRUSH brush=CreateHatchBrush(HS_CROSS, RGB(0, 100, 255));
+        SelectObject(hdc, brush);
+        Rectangle(hdc, x - 25, y - 25, x + 25, y + 25);
+        DeleteObject(brush);*/
+        
+        /*HBRUSH brush=CreateHatchBrush(HS_CROSS, RGB(0, 100, 255));
+        HPEN pen = CreatePen(PS_SOLID, 5, RGB(255,0,0));
+        SelectObject(hdc, brush);
+        SelectObject(hdc, pen);
+        Rectangle(hdc, x - 25, y - 25, x + 25, y + 25);
+        DeleteObject(brush);
+        DeleteObject(pen);*/
+
+       /*HBRUSH brush=CreateHatchBrush(HS_CROSS, RGB(0, 100, 255));
+       HPEN pen = CreatePen(PS_SOLID, 5, RGB(255,0,0));
+       SelectObject(hdc, brush);
+       SelectObject(hdc, pen);
+       SelectObject(hdc, GetStockObject(GRAY_BRUSH));
+       Rectangle(hdc, x - 25, y - 25, x + 25, y + 25);
+       DeleteObject(brush);
+       DeleteObject(pen);*/
+
+       SelectObject(hdc, GetStockObject(SYSTEM_FIXED_FONT));
+       myTextOut(hdc, x, y, L"Marcin");
+
+
+        ReleaseDC(hwnd, hdc);
+
+        break;
+    }
+
 
     case WM_DESTROY:
         PostQuitMessage(0);       /* send a WM_QUIT to the message queue */
         break;
     default:                      /* for messages that we don't deal with */
         return DefWindowProc(hwnd, message, wParam, lParam);
+    
     }
 
     return 0;

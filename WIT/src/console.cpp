@@ -43,3 +43,8 @@ std::string T2str(TCHAR x[])
     std::string arr_s(arr_w.begin(), arr_w.end());
     return arr_s;
 }
+
+void printT(TCHAR x[])
+{
+    std::wcout << x << '\n';
+}
