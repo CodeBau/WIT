@@ -33,6 +33,10 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
     /*  Create console */
     CreateConsole();
 
+    /*console test witch prinT and print function*/
+    printT(szClassName);
+    print(T2str(szClassName));
+
     HWND hwnd;               /* This is the handle for our window */
     MSG messages;            /* Here messages to the application are saved */
     WNDCLASSEX wincl;        /* Data structure for the windowclass */
@@ -57,14 +61,7 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
     /* Register the window class, and if it fails quit the program */
     if (!RegisterClassEx(&wincl))
         return 0;
-
-    
-    
-   
-    /*console test witch prinT and print function*/
-    printT(szClassName);
-    print(T2str(szClassName));
-    
+  
     /* The class is registered, let's create the program*/
     int scrx = GetSystemMetrics(SM_CXSCREEN);
     int scry = GetSystemMetrics(SM_CYSCREEN);
