@@ -16,21 +16,23 @@
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 
-
-
 /*  Make the class name into a global variable  */
 TCHAR szClassName[] = L"WIT";
 TCHAR szTitle[] = L"WIT - logowanie";
 TCHAR textsave[] = L"";
 
+HWND TextBox;
 
-HWND g_hEdit, g_hButW, g_hButC, hFout, button, TextBox;
+
 
 int WINAPI WinMain(HINSTANCE hThisInstance,
                    HINSTANCE hPrevInstance,
                    LPSTR lpszArgument,
                    int nCmdShow)
 {
+    /*  Create console */
+    CreateConsole();
+
     HWND hwnd;               /* This is the handle for our window */
     MSG messages;            /* Here messages to the application are saved */
     WNDCLASSEX wincl;        /* Data structure for the windowclass */
@@ -56,14 +58,13 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
     if (!RegisterClassEx(&wincl))
         return 0;
 
-    /*  Create console window  */
-    CreateConsole();
+    
+    
    
+    /*console test witch prinT and print function*/
     printT(szClassName);
     print(T2str(szClassName));
     
- 
-
     /* The class is registered, let's create the program*/
     int scrx = GetSystemMetrics(SM_CXSCREEN);
     int scry = GetSystemMetrics(SM_CYSCREEN);
@@ -124,22 +125,22 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
     {
     case WM_CREATE:
 
-                 button=CreateWindow(L"BUTTON",
+                 CreateWindow(L"BUTTON",
                                      L"Przyc 1",
                                      WS_CHILD | WS_VISIBLE | BS_FLAT,
                                      10, 10, 100, 20,
                                      hwnd, (HMENU) 1, NULL, NULL);
-                 button=CreateWindow(L"BUTTON",
+                 CreateWindow(L"BUTTON",
                                      L"Przyc 2",
                                      WS_CHILD | WS_VISIBLE | BS_FLAT,
                                      10, 40, 100, 20,
                                      hwnd, (HMENU) 2, NULL, NULL);
-                 TextBox=CreateWindow(L"EDIT",
+                 TextBox = CreateWindow(L"EDIT",
                                       L"",
                                       WS_CHILD | WS_VISIBLE | WS_BORDER,
                                       10, 80, 100, 20,
                                       hwnd, NULL, NULL, NULL);
-                 button=CreateWindow(L"BUTTON",
+                 CreateWindow(L"BUTTON",
                                        L"GO",
                                        WS_CHILD | WS_VISIBLE | BS_FLAT,
                                        10, 110, 100, 20,

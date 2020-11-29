@@ -6,6 +6,7 @@
 
 #include "../include/console.h"
 
+/*console generator function in winapi*/
 void CreateConsole()
 {
     if (!AllocConsole()) {
@@ -36,7 +37,7 @@ void CreateConsole()
     std::wcin.clear();
 }
 
-
+/*function to convert TCHAR to a string*/
 std::string T2str(TCHAR x[])
 {
     std::wstring arr_w(x);
@@ -44,6 +45,7 @@ std::string T2str(TCHAR x[])
     return arr_s;
 }
 
+/*function that prints CHAR to the console*/
 void printT(TCHAR x[])
 {
     std::wcout << x << '\n';

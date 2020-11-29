@@ -5,9 +5,12 @@
 #include <iostream>
 #include <string>
 
+/*see console.cpp for function definitions */
 extern void CreateConsole(); 
 extern std::string T2str(TCHAR x[]);
 extern void printT(TCHAR x[]);
+
+/*function that prints everything (! except CHAR!) to the console.*/
 template <typename T>
 void print(const T& x)
 {
