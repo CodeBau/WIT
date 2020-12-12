@@ -6,9 +6,10 @@
 #include <string>
 
 /*see console.cpp for function definitions */
-extern void CreateConsole(); 
+//extern void CreateConsole(); 
 extern std::string T2str(TCHAR x[]);
 extern void printT(TCHAR x[]);
+//extern void loadImages(HBITMAP img);
 
 /*function that prints everything (! except CHAR!) to the console.*/
 template <typename T>

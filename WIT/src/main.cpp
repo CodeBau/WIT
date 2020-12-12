@@ -10,8 +10,123 @@
 #include <tchar.h>
 #include <Windows.h>
 #include <iostream>
+#include <stdlib.h>
+#include <vector>
+#include <cassert>
 
-#include "../include/console.h"
+#include "../include/winapifn.h"
+#include "../resource.h"
+
+struct MyColor {
+    uint8_t r = 0;
+    uint8_t g = 0;
+    uint8_t b = 0;
+    uint8_t a = 0;
+
+    void set(uint8_t r_ = 0, uint8_t g_ = 0, uint8_t b_ = 0)
+    {
+        r = r_;
+        g = g_;
+        b = b_;
+        a = 0;
+
+    }
+};
+
+class MyBitmap {
+public:
+
+    ~MyBitmap() {
+        destroy();
+    }
+    void create(int width, int height)
+    {
+        std::vector<MyColor> pixels;
+        pixels.resize(width * height);
+       
+
+        for (int y = 0; y < height; y++) 
+        {
+            auto* p = &pixels[y * width];
+            for (int x = 0; x < width; x++)
+            {
+                p->set(x, y, 0);
+                p++;
+            }
+        }
+
+        m_bmp = CreateBitmap(width, height, 1, 32, pixels.data());
+        if (!m_bmp) 
+        {
+            assert(false);
+            return;
+        }
+        m_width = width;
+        m_height = height;
+            
+    }
+
+    void loadFromResource()
+    {
+        destroy();
+        m_bmp=LoadBitmap(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDB_BITMAP1));
+        if (!m_bmp)
+        {
+            assert(false);
+            return;
+        }
+        BITMAP info;
+        GetObject(m_bmp, sizeof(info), &info);
+        m_width = info.bmWidth;
+        m_height = info.bmHeight;
+
+    }
+
+    void loadFromFile()
+    {
+    destroy();
+    m_bmp = (HBITMAP)LoadImage(NULL, L"media/img/Logo.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    if (!m_bmp)
+    {
+        assert(false);
+        return;
+    }
+
+    BITMAP info;
+    GetObject(m_bmp, sizeof(info), &info);
+    m_width = info.bmWidth;
+    m_height = info.bmHeight;
+    }
+
+    void destroy() 
+    {
+        if (m_bmp)
+        {
+            DeleteObject(m_bmp);
+            m_bmp = nullptr;
+        }
+    }
+
+    void draw(HDC hdc, int x, int y)
+    {
+        if (!m_bmp)
+            return;
+        auto src = CreateCompatibleDC(hdc);
+
+        SelectObject(src, m_bmp);
+
+        BitBlt(hdc, x, y, m_width, m_height, src, 0, 0, SRCCOPY);
+
+        DeleteDC(src);
+
+    }
+private:
+    HBITMAP m_bmp = nullptr;
+    int m_width = 0; 
+    int m_height = 0; 
+};
+
+
 
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
@@ -21,7 +136,10 @@ TCHAR szClassName[] = L"WIT";
 TCHAR szTitle[] = L"WIT - logowanie";
 TCHAR textsave[] = L"";
 
+
 HWND TextBox;
+
+HBITMAP hbmObraz, m_bmp = nullptr;
 
 
 
@@ -30,9 +148,6 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
                    LPSTR lpszArgument,
                    int nCmdShow)
 {
-    /*  Create console */
-    CreateConsole();
-
     /*console test witch prinT and print function*/
     printT(szClassName);
     print(T2str(szClassName));
@@ -74,7 +189,8 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
  //           0,                   /* Extended possibilites for variation */
             szClassName,         /* Classname */
             szTitle,           /* Title Text */
-            WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION, /* default window */
+            WS_OVERLAPPEDWINDOW,
+            //WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION, /* default window */
             scrcentralx,       /* Windows decides the position */
             scrcentraly,       /* where the window ends up on the screen */
             windx,                 /* The programs width */
@@ -104,7 +220,6 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
    
 }
 
-
 /*  This function is called by the Windows function DispatchMessage()  */
 
 void myTextOut(HDC hdc, int x, int y, const wchar_t* text)
@@ -115,14 +230,25 @@ void myTextOut(HDC hdc, int x, int y, const wchar_t* text)
 }
 
 
+MyBitmap bmp;
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    
+    
     switch (message)                  /* handle the messages */
     {
     case WM_CREATE:
 
-                 CreateWindow(L"BUTTON",
+        //bmp.create(256, 256);
+        //bmp.loadFromResource();
+        bmp.loadFromFile();
+        
+       
+                 /*always load images first */
+        
+
+                /* CreateWindow(L"BUTTON",
                                      L"Przyc 1",
                                      WS_CHILD | WS_VISIBLE | BS_FLAT,
                                      10, 10, 100, 20,
@@ -141,8 +267,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
                                        L"GO",
                                        WS_CHILD | WS_VISIBLE | BS_FLAT,
                                        10, 110, 100, 20,
-                                       hwnd, (HMENU)3, NULL, NULL);
+                                       hwnd, (HMENU)3, NULL, NULL);*/
                  
+
             /*g_hEdit = CreateWindowEx(WS_EX_CLIENTEDGE, (LPCWSTR)L"EDIT", NULL,
                 WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
                 10, 10, 300, 100, hwnd, NULL, NULL, NULL);
@@ -161,6 +288,18 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
                 hwnd, (HMENU)ID_BUTTON_CLOSE, NULL, NULL);
             if (!g_hButC) SendMessage(hwnd, WM_CLOSE, NULL, NULL);
             */
+
+        break;
+
+
+
+    case WM_PAINT:
+        PAINTSTRUCT ps;
+        BeginPaint(hwnd, &ps);
+
+
+        bmp.draw(ps.hdc, 60, 200);
+        
         break;
 
     case WM_COMMAND:
@@ -184,75 +323,75 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
             break;
         case 3:
             int gwtstat = 0;
-            //char* t = [0];
             gwtstat = GetWindowText(TextBox, textsave ,20);
-
             ::MessageBox(hwnd, textsave, textsave, MB_OK);
-
             break;
         }
         break;
 
     case WM_LBUTTONDOWN: {
-        auto x = (int16_t)(lParam & 0xffff);
-        auto y = (int16_t)(lParam >> 16 & 0xffff);
-        printf("Left Button Down %d %d\n", x, y);
+    auto x = (int16_t)(lParam & 0xffff);
+    auto y = (int16_t)(lParam >> 16 & 0xffff);
+    printf("Left Button Down %d %d\n", x, y);
 
-        HDC hdc = GetDC(hwnd);
+    auto hdc = GetDC(hwnd);
+    bmp.draw(hdc, x, y);
+    ReleaseDC(hwnd,hdc);
 
-        //Rectangle(hdc, x, y, x + 5, y + 20);
-        //TextOut(hdc, x, y, L"Hallo", 10);
-        //myTextOut(hdc, x, y, L"Marcin");
-        //myTextOut(hdc, x, y + 20, L"Lesniewski");
-       
-        //POINT pt;
-        //MoveToEx(hdc, x, y, &pt);
-        //LineTo(hdc, x+10, y+10);
-        //LineDDA(50, 50, x, y,);
+    //    //HDC hdc = GetDC(hwnd);
 
-        /*for (int j = 0; j < 256; j++) {
-            for (int i = 0; i < 256; i++) {
-                COLORREF color = RGB(i, j, 0);
-                SetPixel(hdc, x+i, y+j, color);
-            }
-        }*/
-        
-        /*HBRUSH brush=CreateSolidBrush(RGB(0, 100, 255));
-        SelectObject(hdc, brush);
-        Rectangle(hdc, x - 25, y - 25, x + 25, y + 25);
-        DeleteObject(brush);*/
+    //    //Rectangle(hdc, x, y, x + 5, y + 20);
+    //    //TextOut(hdc, x, y, L"Hallo", 10);
+    //    //myTextOut(hdc, x, y, L"Marcin");
+    //    //myTextOut(hdc, x, y + 20, L"Lesniewski");
+    //   
+    //    //POINT pt;
+    //    //MoveToEx(hdc, x, y, &pt);
+    //    //LineTo(hdc, x+10, y+10);
+    //    //LineDDA(50, 50, x, y,);
 
-        
-        /*HBRUSH brush=CreateHatchBrush(HS_CROSS, RGB(0, 100, 255));
-        SelectObject(hdc, brush);
-        Rectangle(hdc, x - 25, y - 25, x + 25, y + 25);
-        DeleteObject(brush);*/
-        
-        /*HBRUSH brush=CreateHatchBrush(HS_CROSS, RGB(0, 100, 255));
-        HPEN pen = CreatePen(PS_SOLID, 5, RGB(255,0,0));
-        SelectObject(hdc, brush);
-        SelectObject(hdc, pen);
-        Rectangle(hdc, x - 25, y - 25, x + 25, y + 25);
-        DeleteObject(brush);
-        DeleteObject(pen);*/
+    //    /*for (int j = 0; j < 256; j++) {
+    //        for (int i = 0; i < 256; i++) {
+    //            COLORREF color = RGB(i, j, 0);
+    //            SetPixel(hdc, x+i, y+j, color);
+    //        }
+    //    }*/
+    //    
+    //    /*HBRUSH brush=CreateSolidBrush(RGB(0, 100, 255));
+    //    SelectObject(hdc, brush);
+    //    Rectangle(hdc, x - 25, y - 25, x + 25, y + 25);
+    //    DeleteObject(brush);*/
 
-       /*HBRUSH brush=CreateHatchBrush(HS_CROSS, RGB(0, 100, 255));
-       HPEN pen = CreatePen(PS_SOLID, 5, RGB(255,0,0));
-       SelectObject(hdc, brush);
-       SelectObject(hdc, pen);
-       SelectObject(hdc, GetStockObject(GRAY_BRUSH));
-       Rectangle(hdc, x - 25, y - 25, x + 25, y + 25);
-       DeleteObject(brush);
-       DeleteObject(pen);*/
+    //    
+    //    /*HBRUSH brush=CreateHatchBrush(HS_CROSS, RGB(0, 100, 255));
+    //    SelectObject(hdc, brush);
+    //    Rectangle(hdc, x - 25, y - 25, x + 25, y + 25);
+    //    DeleteObject(brush);*/
+    //    
+    //    /*HBRUSH brush=CreateHatchBrush(HS_CROSS, RGB(0, 100, 255));
+    //    HPEN pen = CreatePen(PS_SOLID, 5, RGB(255,0,0));
+    //    SelectObject(hdc, brush);
+    //    SelectObject(hdc, pen);
+    //    Rectangle(hdc, x - 25, y - 25, x + 25, y + 25);
+    //    DeleteObject(brush);
+    //    DeleteObject(pen);*/
 
-       SelectObject(hdc, GetStockObject(SYSTEM_FIXED_FONT));
-       myTextOut(hdc, x, y, L"Marcin");
+    //   /*HBRUSH brush=CreateHatchBrush(HS_CROSS, RGB(0, 100, 255));
+    //   HPEN pen = CreatePen(PS_SOLID, 5, RGB(255,0,0));
+    //   SelectObject(hdc, brush);
+    //   SelectObject(hdc, pen);
+    //   SelectObject(hdc, GetStockObject(GRAY_BRUSH));
+    //   Rectangle(hdc, x - 25, y - 25, x + 25, y + 25);
+    //   DeleteObject(brush);
+    //   DeleteObject(pen);*/
 
+    //   /*SelectObject(hdc, GetStockObject(SYSTEM_FIXED_FONT));
+    //   myTextOut(hdc, x, y, L"Marcin");
 
-        ReleaseDC(hwnd, hdc);
+    //    ReleaseDC(hwnd, hdc);*/
 
         break;
-    }
+   }
 
 
     case WM_DESTROY:
@@ -266,3 +405,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
     return 0;
 }
 
+
+int main()
+{
+    WinMain(GetModuleHandle(nullptr), nullptr, GetCommandLineA(), SW_NORMAL);
+
+    return 0;
+}
