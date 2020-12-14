@@ -49,7 +49,7 @@ END
 //
 // Bitmap
 //
-IDB_BITMAP1             BITMAP                  "src\\Logo.bmp"
+IDB_BITMAP1             BITMAP                  "media\\img\\Logo.bmp"
 
 #endif    // Polish (Poland) resources
 /////////////////////////////////////////////////////////////////////////////

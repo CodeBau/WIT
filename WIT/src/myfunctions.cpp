@@ -4,7 +4,10 @@
 #include <string>
 #include <locale.h>
 
-#include "../include/winapifn.h"
+#include "../include/myfunctions.h"
+
+
+
 
 /*function to convert TCHAR to a string*/
 std::string T2str(TCHAR x[])

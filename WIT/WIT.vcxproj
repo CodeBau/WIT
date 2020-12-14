@@ -160,7 +160,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\winapifn.cpp" />
+    <ClCompile Include="src\MyBitmap.cpp" />
+    <ClCompile Include="src\myfunctions.cpp" />
     <ClCompile Include="src\main.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </AdditionalIncludeDirectories>
@@ -173,7 +174,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\winapifn.h" />
+    <ClInclude Include="include\MyBitmap.h" />
+    <ClInclude Include="include\myfunctions.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
