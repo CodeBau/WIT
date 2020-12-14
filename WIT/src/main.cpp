@@ -26,21 +26,8 @@ const wchar_t* szButtonClass = L"MyButton";
 int red = 0;
 int my_counter = 0;
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    switch (message)
-    {
-    case WM_DESTROY: {
-        PostQuitMessage(0);
-        return 0;
-    }
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-    case WM_COMMAND: {
-        printf("WM_COMMAND %d\n", wParam);
-    }break;
-    } // switch    
-    return DefWindowProc(hWnd, message, wParam, lParam);
-}
 
 struct MyButtonData {
     bool down = false;
@@ -51,69 +38,8 @@ bool isInsideRect(RECT& rc, LONG x, LONG y) {
     return (x >= rc.left && x <= rc.right && y >= rc.top && y <= rc.bottom);
 }
 
-LRESULT CALLBACK ButtonProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    switch (message)
-    {
-    case WM_CREATE: {
-        auto* data = new MyButtonData();
-        SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<intptr_t>(data));
-    }break;
+LRESULT CALLBACK ButtonProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-    case WM_DESTROY: {
-        auto* data = reinterpret_cast<MyButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-        delete data;
-    }break;
-
-    case WM_PAINT: {
-        auto* data = reinterpret_cast<MyButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-
-        PAINTSTRUCT ps;
-        BeginPaint(hWnd, &ps);
-
-        RECT rc;
-        GetClientRect(hWnd, &rc);
-        SelectObject(ps.hdc, GetStockObject(BLACK_PEN));
-
-        SelectObject(ps.hdc, data->down ? GetStockObject(LTGRAY_BRUSH) : GetStockObject(WHITE_BRUSH));
-
-        Rectangle(ps.hdc, rc.left, rc.top, rc.right, rc.bottom);
-
-        wchar_t text[512];
-        GetWindowText(hWnd, text, 512);
-
-        SetBkMode(ps.hdc, TRANSPARENT);
-        DrawText(ps.hdc, text, -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
-        EndPaint(hWnd, &ps);
-    }break;
-
-    case WM_LBUTTONDOWN: {
-        auto* data = reinterpret_cast<MyButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-        data->down = true;
-        SetCapture(hWnd);
-        InvalidateRect(hWnd, nullptr, false);
-    }break;
-
-    case WM_LBUTTONUP: {
-        auto* data = reinterpret_cast<MyButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-        data->down = false;
-        ReleaseCapture();
-        InvalidateRect(hWnd, nullptr, false);
-
-        auto x = GET_X_LPARAM(lParam); 
-        auto y = GET_Y_LPARAM(lParam);
-
-        RECT rc;
-        GetClientRect(hWnd, &rc);
-
-        if (isInsideRect(rc, x, y)) {
-            SendMessage(GetParent(hWnd), WM_COMMAND, (WPARAM)GetMenu(hWnd), 0);
-        }
-    }break;
-
-    } // switch    
-    return DefWindowProc(hWnd, message, wParam, lParam);
-}
 
 void initButtonClass(HINSTANCE hInstance) {
     WNDCLASSEX wcex;
@@ -158,23 +84,40 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     wcex.hIconSm = nullptr;
 
     RegisterClassEx(&wcex);
-    //------------------------
+
+    int scrx = GetSystemMetrics(SM_CXSCREEN);
+    int scry = GetSystemMetrics(SM_CYSCREEN);
+    int windx = 600;
+    int windy = 400;
+    int scrcentralx = (scrx / 2) - (windx / 2);
+    int scrcentraly = (scry / 2) - (windy / 2);
+
+    //----Window----------
     HWND hwnd = CreateWindowEx(0,
         szWindowClass,
         L"MyWindow Title",
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, 640, 480,
+        WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION, /* default window */
+        scrcentralx,       /* Windows decides the position */
+        scrcentraly,       /* where the window ends up on the screen */
+        windx,                 /* The programs width */
+        windy,                 /* and height in pixels */
         nullptr,
         nullptr,
         hInstance,
         0);
     //--- Button ------
     initButtonClass(hInstance);
-    CreateWindowEx(0, szButtonClass, L"YES", WS_CHILD | WS_VISIBLE, 10, 10, 200, 40, hwnd, (HMENU)1, hInstance, nullptr);
-    CreateWindowEx(0, szButtonClass, L"NO", WS_CHILD | WS_VISIBLE, 220, 10, 200, 40, hwnd, (HMENU)2, hInstance, nullptr);
+    int window_grid=25;
+    int button_size_x = 175;
+    int button_size_y = 25;
+    float button_level_in_windows = 0.6;
 
-    CreateWindowEx(0, L"Button", L"Test", WS_CHILD | WS_VISIBLE, 10, 100, 200, 40, hwnd, (HMENU)10, hInstance, nullptr);
-    CreateWindowEx(0, L"Edit", L"Text Input...", WS_CHILD | WS_VISIBLE | WS_BORDER, 220, 100, 200, 40, hwnd, nullptr, hInstance, nullptr);
+    CreateWindowEx(0, szButtonClass, L"CENTRAL", WS_CHILD | WS_VISIBLE, ((windx-button_size_x)/2), windy*button_level_in_windows, button_size_x, button_size_y, hwnd, (HMENU)1, hInstance, nullptr);
+    CreateWindowEx(0, szButtonClass, L"LEFT", WS_CHILD | WS_VISIBLE, ((windx - 2*button_size_x-window_grid) / 2), (windy * button_level_in_windows+2*window_grid), button_size_x, button_size_y, hwnd, (HMENU)2, hInstance, nullptr);
+    CreateWindowEx(0, szButtonClass, L"RIGHT", WS_CHILD | WS_VISIBLE, (((windx - 2 * button_size_x - window_grid) / 2)+window_grid+button_size_x), (windy * button_level_in_windows + 2*window_grid), button_size_x, button_size_y, hwnd, (HMENU)3, hInstance, nullptr);
+
+    //CreateWindowEx(0, L"Button", L"Test", WS_CHILD | WS_VISIBLE, 10, 100, 200, 40, hwnd, (HMENU)10, hInstance, nullptr);
+    //CreateWindowEx(0, L"Edit", L"Text Input...", WS_CHILD | WS_VISIBLE | WS_BORDER, 220, 100, 200, 40, hwnd, nullptr, hInstance, nullptr);
 
     //-----------------------
     ShowWindow(hwnd, SW_NORMAL);
@@ -189,6 +132,87 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     }
 
     return msg.wParam;
+}
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch (message)
+    {
+    case WM_DESTROY: {
+        PostQuitMessage(0);
+        return 0;
+    }
+
+    case WM_COMMAND: {
+        printf("WM_COMMAND %d\n", wParam);
+    }break;
+    } // switch    
+    return DefWindowProc(hWnd, message, wParam, lParam);
+}
+
+LRESULT CALLBACK ButtonProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch (message)
+    {
+    case WM_CREATE: {
+        auto* data = new MyButtonData();
+        SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<intptr_t>(data));
+    }break;
+
+    case WM_DESTROY: {
+        auto* data = reinterpret_cast<MyButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        delete data;
+    }break;
+
+    case WM_PAINT: {
+        auto* data = reinterpret_cast<MyButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+
+        PAINTSTRUCT ps;
+        BeginPaint(hWnd, &ps);
+
+        RECT rc;
+        GetClientRect(hWnd, &rc);
+        SelectObject(ps.hdc, GetStockObject(BLACK_PEN));
+
+        SelectObject(ps.hdc, data->down ? GetStockObject(LTGRAY_BRUSH) : GetStockObject(WHITE_BRUSH));
+
+        Rectangle(ps.hdc, rc.left, rc.top, rc.right, rc.bottom);
+
+        wchar_t text[512];
+        GetWindowText(hWnd, text, 512);
+        printT(text);
+
+        SetBkMode(ps.hdc, TRANSPARENT);
+        DrawText(ps.hdc, text, -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+        EndPaint(hWnd, &ps);
+    }break;
+
+    case WM_LBUTTONDOWN: {
+        auto* data = reinterpret_cast<MyButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        data->down = true;
+        SetCapture(hWnd);
+        InvalidateRect(hWnd, nullptr, false);
+    }break;
+
+    case WM_LBUTTONUP: {
+        auto* data = reinterpret_cast<MyButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        data->down = false;
+        ReleaseCapture();
+        InvalidateRect(hWnd, nullptr, false);
+
+        auto x = GET_X_LPARAM(lParam);
+        auto y = GET_Y_LPARAM(lParam);
+
+        RECT rc;
+        GetClientRect(hWnd, &rc);
+
+        if (isInsideRect(rc, x, y)) {
+            SendMessage(GetParent(hWnd), WM_COMMAND, (WPARAM)GetMenu(hWnd), 0);
+        }
+    }break;
+
+    } // switch    
+    return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 int main() {
