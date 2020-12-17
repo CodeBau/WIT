@@ -26,6 +26,7 @@ HFONT hFont;
 const wchar_t* szWindowClass = L"WiT";
 const wchar_t* szButtonClass = L"MyButton";
 
+
 int red = 0;
 int my_counter = 0;
 
@@ -139,9 +140,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return msg.wParam;
 }
 
+int flag_loging_window = 1; /* 1-log, 2-registration, 3-password remind*/
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {    
+
     switch (message)
     {
    
@@ -156,7 +159,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 LRESULT CALLBACK ButtonProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    int flag_loging_window = 1; /* 1-log, 2-registration, 3-password remind*/
 
     switch (message)
     {
