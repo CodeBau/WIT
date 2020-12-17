@@ -224,3 +224,28 @@ case WM_LBUTTONDOWN: {
     od chinczyka tworzenie Button and Edit
     CreateWindowEx(0, L"Button", L"Test", WS_CHILD | WS_VISIBLE, 10, 100, 200, 40, hwnd, (HMENU)10, hInstance, nullptr);
     CreateWindowEx(0, L"Edit", L"Text Input...", WS_CHILD | WS_VISIBLE | WS_BORDER, 220, 100, 200, 40, hwnd, nullptr, hInstance, nullptr);
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_DESTROY: {
+		PostQuitMessage(0);
+		return 0;
+	}
+
+	case WM_COMMAND: {
+		printf("WM_COMMAND %d\n", wParam);
+	}break;
+	} // switch    
+	return DefWindowProc(hWnd, message, wParam, lParam);
+}
