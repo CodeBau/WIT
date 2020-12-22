@@ -22,3 +22,7 @@ template<class T>
 inline void my_bzero(T& s) {
 	memset(&s, 0, sizeof(s));
 }
+
+
+HFONT myfont(int font_size, LPCWSTR font_type);
+

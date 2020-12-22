@@ -30,3 +30,8 @@ void printT(TCHAR x[])
 //    img = (HBITMAP)LoadImageW(NULL, L"Logo.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 //
 //}
+
+HFONT myfont(int font_size, LPCWSTR font_type)
+{
+    return CreateFont(font_size, 0, 0, 0, NULL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, font_type);
+}
