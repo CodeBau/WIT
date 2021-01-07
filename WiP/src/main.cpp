@@ -14,7 +14,7 @@
 
 //  Declare Windows procedure  
 
-HWND hwnd_LogWin, hwnd_ServerLogWin, hwnd_ServerLogWin_EditLogin, hwnd_ServerLogWin_EditPassword;
+HWND hwnd_LogWin, hwnd_ServerLogWin, hwnd_ServerLogWin_EditLogin, hwnd_ServerLogWin_EditPassword, hwnd_LogWin_EditLogin, hwnd_LogWin_EditPassword, hwnd_LogWin_CheckData;
 HFONT hFont;
 
 int red = 0;
@@ -39,6 +39,14 @@ struct LogWinButtonData {
 bool isInsideRect(RECT& rc, LONG x, LONG y) {
     return (x >= rc.left && x <= rc.right && y >= rc.top && y <= rc.bottom);
 }
+
+void font_and_text_set(int x, int y, PAINTSTRUCT &ps, LPCWSTR text, RECT rc)
+{
+    hFont = CreateFont(x, 0, 0, 0, y, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
+    SelectObject(ps.hdc, hFont);
+    DrawText(ps.hdc, text, -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+}
+
 
 LRESULT CALLBACK ServerLogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK ServerLogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -132,32 +140,45 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     //----ServerLogWin----------
     initServerLogWinClass(hInstance);
     hwnd_ServerLogWin = CreateWindowEx(0, L"ServerLogWinClass", L"WiP", WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION, scrcentralx, scrcentraly, windx, windy, nullptr, nullptr, hInstance, 0);
+
+    hwnd_ServerLogWin_EditLogin = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | DT_CENTER, 100, 50, button_size_x, button_size_y, hwnd_ServerLogWin, nullptr, hInstance, nullptr);
+    hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
+    SendMessage(hwnd_ServerLogWin_EditLogin, WM_SETFONT, WPARAM(hFont), TRUE);
+    hwnd_ServerLogWin_EditPassword = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_BORDER, 100, 112, button_size_x, button_size_y, hwnd_ServerLogWin, nullptr, hInstance, nullptr);
+    
     //--- LogWinButton ------
     initServerLogWinButtonClass(hInstance);
     CreateWindowEx(0, L"ServerLogWinButtonClass", L"B_LOG", WS_CHILD | WS_VISIBLE, 325, 105, button_size_x, button_size_y, hwnd_ServerLogWin, (HMENU)1, hInstance, nullptr);
     CreateWindowEx(0, L"ServerLogWinButtonClass", L"B_OFFLINE", WS_CHILD | WS_VISIBLE, 325, 283, button_size_x, button_size_y, hwnd_ServerLogWin, (HMENU)2, hInstance, nullptr);
     
-    hwnd_ServerLogWin_EditLogin = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | DT_CENTER, 100, 50, button_size_x, button_size_y, hwnd_ServerLogWin, nullptr, hInstance, nullptr);
-    hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
-    SendMessage(hwnd_ServerLogWin_EditLogin, WM_SETFONT, WPARAM(hFont), TRUE);
-    hwnd_ServerLogWin_EditPassword = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_BORDER, 100, 112, button_size_x, button_size_y, hwnd_ServerLogWin, nullptr, hInstance, nullptr);
-
 
     //-----------------------
     ShowWindow(hwnd_ServerLogWin, SW_NORMAL);
     UpdateWindow(hwnd_ServerLogWin);
 
+
+
     //----LogWin----------
     initLogWinClass(hInstance);
     hwnd_LogWin = CreateWindowEx(0,L"LogWinClass",L"WiP",WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION,scrcentralx,scrcentraly,windx,windy,nullptr,nullptr,hInstance,0);
+    
+    hwnd_LogWin_EditLogin = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | DT_CENTER, ((windx - button_size_x) / 2), 75, button_size_x, button_size_y, hwnd_LogWin, nullptr, hInstance, nullptr);
+    hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
+    SendMessage(hwnd_LogWin_EditLogin, WM_SETFONT, WPARAM(hFont), TRUE);
+
+    hwnd_LogWin_EditPassword = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | DT_CENTER, ((windx - button_size_x) / 2), 125, button_size_x, button_size_y, hwnd_LogWin, nullptr, hInstance, nullptr);
+    SendMessage(hwnd_LogWin_EditPassword, WM_SETFONT, WPARAM(hFont), TRUE);
+
+    hwnd_LogWin_CheckData = CreateWindowEx(0, L"Button", L"", WS_CHILD | WS_VISIBLE | BS_CHECKBOX, 182, 163, 25, 25, hwnd_LogWin, (HMENU)4, hInstance, nullptr);
+    CheckDlgButton(hwnd_LogWin_CheckData, 4, BST_CHECKED);
+    
     //--- LogWinButton ------
     initLogWinButtonClass(hInstance);
     CreateWindowEx(0, L"LogWinButtonClass", L"B_CENTRAL", WS_CHILD | WS_VISIBLE, ((windx - button_size_x) / 2), (windy -6*window_grid), button_size_x, button_size_y, hwnd_LogWin, (HMENU)1, hInstance, nullptr);
-    CreateWindowEx(0, L"LogWinButtonClass", L"B_LEFT", WS_CHILD | WS_VISIBLE, ((windx - 2 * button_size_x - window_grid) / 2), (windy - 6*window_grid + 2 * window_grid), button_size_x, button_size_y, hwnd_LogWin, (HMENU)2, hInstance, nullptr);
-    CreateWindowEx(0, L"LogWinButtonClass", L"B_RIGHT", WS_CHILD | WS_VISIBLE, (((windx - 2 * button_size_x - window_grid) / 2) + window_grid + button_size_x), (windy - 6*window_grid + 2 * window_grid), button_size_x, button_size_y, hwnd_LogWin, (HMENU)3, hInstance, nullptr);
+    CreateWindowEx(0, L"LogWinButtonClass", L"B_LEFT", WS_CHILD | WS_VISIBLE, 15, 340, 100, 15, hwnd_LogWin, (HMENU)2, hInstance, nullptr);
+    CreateWindowEx(0, L"LogWinButtonClass", L"B_RIGHT", WS_CHILD | WS_VISIBLE, 130, 340, 100, 15, hwnd_LogWin, (HMENU)3, hInstance, nullptr);
 
     //CreateWindowEx(0, L"Button", L"Test", WS_CHILD | WS_VISIBLE, 10, 100, 200, 40, hwnd, (HMENU)10, hInstance, nullptr);
-    CreateWindowEx(0, L"Edit", L"Text Input...", WS_CHILD | WS_VISIBLE | WS_BORDER , ((windx - button_size_x) / 2), 100, 200, 40, hwnd_LogWin, nullptr, hInstance, nullptr);
 
     //-----------------------
     ShowWindow(hwnd_LogWin, SW_NORMAL);
@@ -283,6 +304,7 @@ LRESULT CALLBACK ServerLogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPAR
             DrawText(ps.hdc, L"tryb offline", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
         }
 
+
         EndPaint(hWnd, &ps);
 
     }break;//WM_PAINT
@@ -340,11 +362,20 @@ LRESULT CALLBACK ServerLogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPAR
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-
 LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {    
     switch (message)
     {
+    case WM_CREATE:
+    {
+        CreateWindow(TEXT("button"), TEXT("Show Title"),
+            WS_VISIBLE | WS_CHILD | BS_CHECKBOX,
+            20, 20, 185, 35,
+            hWnd, (HMENU)5, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+        CheckDlgButton(hWnd, 5, BST_CHECKED);
+        break;
+    }
+
     case WM_PAINT: {
         PAINTSTRUCT ps;
         BeginPaint(hWnd, &ps);
@@ -353,23 +384,42 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
 
         RECT rc;
-        SetRect(&rc, ((windx - button_size_x) / 2), window_grid, ((windx - button_size_x) / 2)+button_size_x, window_grid+button_size_y);
-        ::FillRect(ps.hdc, &rc, hBrush);
-
+        SetRect(&rc, ((windx - button_size_x) / 2), 50, ((windx - button_size_x) / 2)+button_size_x, 75);
+        //::FillRect(ps.hdc, &rc, hBrush);
         hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
         SelectObject(ps.hdc, hFont);
         SetTextColor(ps.hdc, RGB(0, 72, 0));
         SetBkMode(ps.hdc, TRANSPARENT);
-        DrawText(ps.hdc, L"przypomnij has這", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+        DrawText(ps.hdc, L"Podaj login:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
-        SetRect(&rc, ((windx - button_size_x) / 2), 3*window_grid, ((windx - button_size_x) / 2) + button_size_x, 3*window_grid + button_size_y);
-        DrawText(ps.hdc, L"dupa", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+        SetRect(&rc, ((windx - button_size_x) / 2), 100, ((windx - button_size_x) / 2) + button_size_x, 125);
+        DrawText(ps.hdc, L"Podaj has這:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+
+        SetRect(&rc, 208, 163, 393, 188);
+        DrawText(ps.hdc, L"Zapami皻aj dane logowania", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+
 
 
 
         EndPaint(hWnd, &ps);
 
     }break;//WM_PAINT
+
+
+    case WM_COMMAND:
+    {
+        switch (LOWORD(wParam))
+        { 
+            int checked = IsDlgButtonChecked(hWnd, 5);
+            if (checked) {
+                CheckDlgButton(hWnd, 5, BST_UNCHECKED);
+            }
+            else {
+                CheckDlgButton(hWnd, 5, BST_CHECKED);
+            }
+        }
+        break;//WM_COMMAND
+    }
 
     case WM_DESTROY:
         PostQuitMessage(0);
@@ -382,6 +432,9 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    int normal_font = 20;
+    int small_font = 16;
+
     switch (message)
     {
     case WM_CREATE: {
@@ -404,41 +457,31 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         GetClientRect(hWnd, &rc);
         Rectangle(ps.hdc, rc.left, rc.top, rc.right, rc.bottom);
 
+        wchar_t text[512];
+        GetWindowText(hWnd, text, 512);
+        SetBkMode(ps.hdc, TRANSPARENT);
+
         if (data->down)
         {
             SetTextColor(ps.hdc, RGB(240, 240, 240));
             hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
             ::FillRect(ps.hdc, &rc, hBrush);
-            hFont = CreateFont(20, 0, 0, 0, 700, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
-            SelectObject(ps.hdc, hFont);
-        }
-        else
-        {
-            SetTextColor(ps.hdc, RGB(0, 72, 0));
-            hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
-            SelectObject(ps.hdc, hFont);
-            SelectObject(ps.hdc, GetStockObject(WHITE_BRUSH));
-        }
-
-        wchar_t text[512];
-        GetWindowText(hWnd, text, 512);
-        SetBkMode(ps.hdc, TRANSPARENT);
-
-        switch (flag_LogWin)
-        {
+           
+            switch (flag_LogWin)
+            {
             case 2:
             {
                 if (wcscmp(text, L"B_CENTRAL") == 0)
                 {
-                    DrawText(ps.hdc, L"zaloguj", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    font_and_text_set(normal_font, 700, ps, L"zaloguj", rc);
                 }
                 else if (wcscmp(text, L"B_LEFT") == 0)
                 {
-                    DrawText(ps.hdc, L"utw鏎z konto", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    font_and_text_set(small_font, 700, ps, L"utw鏎z konto", rc);
                 }
                 else if (wcscmp(text, L"B_RIGHT") == 0)
                 {
-                    DrawText(ps.hdc, L"przypomnij has這", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    font_and_text_set(small_font, 700, ps, L"przypomnij has這", rc);
                 }
             }break;
 
@@ -446,15 +489,15 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             {
                 if (wcscmp(text, L"B_CENTRAL") == 0)
                 {
-                    DrawText(ps.hdc, L"utw鏎z konto", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    font_and_text_set(normal_font, 700, ps, L"utw鏎z konto", rc);
                 }
                 else if (wcscmp(text, L"B_LEFT") == 0)
                 {
-                    DrawText(ps.hdc, L"zaloguj", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    font_and_text_set(small_font, 700, ps, L"zaloguj", rc);
                 }
                 else if (wcscmp(text, L"B_RIGHT") == 0)
                 {
-                    DrawText(ps.hdc, L"przypomnij has這", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    font_and_text_set(small_font, 700, ps, L"przypomnij has這", rc);
                 }
 
             }break;
@@ -463,19 +506,82 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             {
                 if (wcscmp(text, L"B_CENTRAL") == 0)
                 {
-                    DrawText(ps.hdc, L"przypomnij has這", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    font_and_text_set(normal_font, 700, ps, L"przypomnij has這", rc);
                 }
                 else if (wcscmp(text, L"B_LEFT") == 0)
                 {
-                    DrawText(ps.hdc, L"zaloguj", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    font_and_text_set(small_font, 700, ps, L"zaloguj", rc);
                 }
                 else if (wcscmp(text, L"B_RIGHT") == 0)
                 {
-                    DrawText(ps.hdc, L"utw鏎z konto", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    font_and_text_set(small_font, 700, ps, L"utw鏎z konto", rc);
                 }
             }break;
 
+            }
+
         }
+        else
+        {
+            SetTextColor(ps.hdc, RGB(0, 72, 0));
+            SelectObject(ps.hdc, GetStockObject(WHITE_BRUSH));
+
+            switch (flag_LogWin)
+            {
+            case 2:
+            {
+                if (wcscmp(text, L"B_CENTRAL") == 0)
+                {
+                    font_and_text_set(normal_font, 300, ps, L"zaloguj", rc);
+                }
+                else if (wcscmp(text, L"B_LEFT") == 0)
+                {
+                    font_and_text_set(small_font, 300, ps, L"utw鏎z konto", rc);
+                }
+                else if (wcscmp(text, L"B_RIGHT") == 0)
+                {
+                    font_and_text_set(small_font, 300, ps, L"przypomnij has這", rc);
+                }
+            }break;
+
+            case 3:
+            {
+                if (wcscmp(text, L"B_CENTRAL") == 0)
+                {
+                    font_and_text_set(normal_font, 300, ps, L"utw鏎z konto", rc);
+                }
+                else if (wcscmp(text, L"B_LEFT") == 0)
+                {
+                    font_and_text_set(small_font, 300, ps, L"zaloguj", rc);
+                }
+                else if (wcscmp(text, L"B_RIGHT") == 0)
+                {
+                    font_and_text_set(small_font, 300, ps, L"przypomnij has這", rc);
+                }
+
+            }break;
+
+            case 4:
+            {
+                if (wcscmp(text, L"B_CENTRAL") == 0)
+                {
+                    font_and_text_set(normal_font, 300, ps, L"przypomnij has這", rc);
+                }
+                else if (wcscmp(text, L"B_LEFT") == 0)
+                {
+                    font_and_text_set(small_font, 300, ps, L"zaloguj", rc);
+                }
+                else if (wcscmp(text, L"B_RIGHT") == 0)
+                {
+                    font_and_text_set(small_font, 300, ps, L"utw鏎z konto", rc);
+                }
+            }break;
+
+            }
+        }
+
+
+        
 
         EndPaint(hWnd, &ps);
 
