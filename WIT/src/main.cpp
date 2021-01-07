@@ -14,7 +14,7 @@
 
 //  Declare Windows procedure  
 
-HWND hwnd_ServerLogWin, hwnd_LogWin;
+HWND hwnd_LogWin, hwnd_ServerLogWin, hwnd_ServerLogWin_EditLogin, hwnd_ServerLogWin_EditPassword;
 HFONT hFont;
 
 int red = 0;
@@ -35,10 +35,6 @@ struct LogWinButtonData {
     bool down = false;
     int yourData = 0;
 };
-struct ServerLogWinButtonData {
-    bool down = false;
-    int yourData = 0;
-};
 
 bool isInsideRect(RECT& rc, LONG x, LONG y) {
     return (x >= rc.left && x <= rc.right && y >= rc.top && y <= rc.bottom);
@@ -47,8 +43,11 @@ bool isInsideRect(RECT& rc, LONG x, LONG y) {
 LRESULT CALLBACK ServerLogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK ServerLogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
+
 LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+
 
 void initServerLogWinClass(HINSTANCE hInstance) {
     WNDCLASSEX wcex;
@@ -82,7 +81,7 @@ void initServerLogWinButtonClass(HINSTANCE hInstance) {
     wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wcex.lpszMenuName = NULL;
-    wcex.lpszClassName = L"LogWinButtonClass";
+    wcex.lpszClassName = L"ServerLogWinButtonClass";
     wcex.hIconSm = nullptr;
 
     RegisterClassEx(&wcex);
@@ -120,29 +119,37 @@ void initLogWinButtonClass(HINSTANCE hInstance) {
     wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wcex.lpszMenuName = NULL;
-    wcex.lpszClassName = L"ServerLogWinButtonClass";
+    wcex.lpszClassName = L"LogWinButtonClass";
     wcex.hIconSm = nullptr;
 
     RegisterClassEx(&wcex);
 }
 
+
+
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     //----ServerLogWin----------
     initServerLogWinClass(hInstance);
-    hwnd_ServerLogWin = CreateWindowEx(0, L"ServerLogWinClass", L"WiT-tryb pracy", WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION, scrcentralx, scrcentraly, windx, windy, nullptr, nullptr, hInstance, 0);
-    
-    //--- ServerLogWinButton ------
+    hwnd_ServerLogWin = CreateWindowEx(0, L"ServerLogWinClass", L"WiP", WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION, scrcentralx, scrcentraly, windx, windy, nullptr, nullptr, hInstance, 0);
+    //--- LogWinButton ------
     initServerLogWinButtonClass(hInstance);
     CreateWindowEx(0, L"ServerLogWinButtonClass", L"B_LOG", WS_CHILD | WS_VISIBLE, 325, 105, button_size_x, button_size_y, hwnd_ServerLogWin, (HMENU)1, hInstance, nullptr);
+    CreateWindowEx(0, L"ServerLogWinButtonClass", L"B_OFFLINE", WS_CHILD | WS_VISIBLE, 325, 283, button_size_x, button_size_y, hwnd_ServerLogWin, (HMENU)2, hInstance, nullptr);
     
+    hwnd_ServerLogWin_EditLogin = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | DT_CENTER, 100, 50, button_size_x, button_size_y, hwnd_ServerLogWin, nullptr, hInstance, nullptr);
+    hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
+    SendMessage(hwnd_ServerLogWin_EditLogin, WM_SETFONT, WPARAM(hFont), TRUE);
+    hwnd_ServerLogWin_EditPassword = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_BORDER, 100, 112, button_size_x, button_size_y, hwnd_ServerLogWin, nullptr, hInstance, nullptr);
+
+
+    //-----------------------
     ShowWindow(hwnd_ServerLogWin, SW_NORMAL);
     UpdateWindow(hwnd_ServerLogWin);
 
-
     //----LogWin----------
     initLogWinClass(hInstance);
-    hwnd_LogWin = CreateWindowEx(0,L"LogWinClass",L"WiT",WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION,scrcentralx,scrcentraly,windx,windy,nullptr,nullptr,hInstance,0);
-    
+    hwnd_LogWin = CreateWindowEx(0,L"LogWinClass",L"WiP",WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION,scrcentralx,scrcentraly,windx,windy,nullptr,nullptr,hInstance,0);
     //--- LogWinButton ------
     initLogWinButtonClass(hInstance);
     CreateWindowEx(0, L"LogWinButtonClass", L"B_CENTRAL", WS_CHILD | WS_VISIBLE, ((windx - button_size_x) / 2), (windy -6*window_grid), button_size_x, button_size_y, hwnd_LogWin, (HMENU)1, hInstance, nullptr);
@@ -156,6 +163,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     ShowWindow(hwnd_LogWin, SW_NORMAL);
     UpdateWindow(hwnd_LogWin);
 
+    
+
     // Main message loop:  
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0))
@@ -168,6 +177,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 }
 
 int flag_LogWin = 2; // 1-servlogin, 2-acclogin, 3-registration, 4-password_remind
+
+
 
 LRESULT CALLBACK ServerLogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -194,16 +205,16 @@ LRESULT CALLBACK ServerLogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         DrawText(ps.hdc, L"Podaj has³o do serwera:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
         SetRect(&rc, 100, 149, 110 + button_size_x, 149 + button_size_y);
-        DrawText(ps.hdc, L"Zapamiêtaj dane logowania", -1, &rc, DT_SINGLELINE  | DT_VCENTER);
-        
+        DrawText(ps.hdc, L"Zapamiêtaj dane logowania", -1, &rc, DT_SINGLELINE | DT_VCENTER);
+
         SetRect(&rc, 100, 186, 110 + button_size_x, 186 + button_size_y);
-        DrawText(ps.hdc, L"Autologowanie", -1, &rc, DT_SINGLELINE  | DT_VCENTER);
+        DrawText(ps.hdc, L"Autologowanie", -1, &rc, DT_SINGLELINE | DT_VCENTER);
 
         SetRect(&rc, 50, 245, 500, 246);
         ::FillRect(ps.hdc, &rc, hBrush);
 
-        SetRect(&rc, 100, 283, 110 + button_size_x, 283 + button_size_y);
-        DrawText(ps.hdc, L"Zawsze uruchamiaj w trybie offline", -1, &rc, DT_SINGLELINE | DT_VCENTER);
+        SetRect(&rc, 100, 270, 100 + button_size_x, 270 + 2*button_size_y);
+        DrawText(ps.hdc, L"Zawsze uruchamiaj \n w trybie offline", -1, &rc, DT_WORDBREAK | DT_VCENTER);
 
 
         EndPaint(hWnd, &ps);
@@ -224,17 +235,17 @@ LRESULT CALLBACK ServerLogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPAR
     switch (message)
     {
     case WM_CREATE: {
-        auto* data = new ServerLogWinButtonData();
+        auto* data = new LogWinButtonData();
         SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<intptr_t>(data));
     }break;
 
     case WM_DESTROY: {
-        auto* data = reinterpret_cast<ServerLogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        auto* data = reinterpret_cast<LogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
         delete data;
     }break;
 
     case WM_PAINT: {
-        auto* data = reinterpret_cast<ServerLogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        auto* data = reinterpret_cast<LogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
         PAINTSTRUCT ps;
         BeginPaint(hWnd, &ps);
 
@@ -262,20 +273,29 @@ LRESULT CALLBACK ServerLogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPAR
         wchar_t text[512];
         GetWindowText(hWnd, text, 512);
         SetBkMode(ps.hdc, TRANSPARENT);
-        DrawText(ps.hdc, text, -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+
+        if (wcscmp(text, L"B_LOG") == 0)
+        {
+            DrawText(ps.hdc, L"zaloguj", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+        }
+        else if (wcscmp(text, L"B_OFFLINE") == 0)
+        {
+            DrawText(ps.hdc, L"tryb offline", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+        }
+
         EndPaint(hWnd, &ps);
 
     }break;//WM_PAINT
 
     case WM_LBUTTONDOWN: {
-        auto* data = reinterpret_cast<ServerLogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        auto* data = reinterpret_cast<LogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
         data->down = true;
         SetCapture(hWnd);
         InvalidateRect(hWnd, nullptr, false);
     }break;//WM_LBUTTONDOWN
 
     case WM_LBUTTONUP: {
-        auto* data = reinterpret_cast<ServerLogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        auto* data = reinterpret_cast<LogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
         data->down = false;
         ReleaseCapture();
         InvalidateRect(hWnd, nullptr, false);
@@ -294,37 +314,32 @@ LRESULT CALLBACK ServerLogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPAR
 
     case WM_COMMAND:
     {
-
         switch (wParam)
         {
-        case 1:
-        {
-            ::MessageBox(hwnd_ServerLogWin, L"LOGUJ", L"", MB_OK);
-            flag_LogWin = 2;
-            InvalidateRect(GetParent(hWnd), NULL, FALSE);
-        }break;
+            case 1:
+            {
+                ::MessageBox(hwnd_ServerLogWin, L"LOGUJ", L"", MB_OK);
+                flag_LogWin = 2;
+                InvalidateRect(GetParent(hWnd), NULL, FALSE);
+            }break;
+            case 2:
+            {
+                ::MessageBox(hwnd_ServerLogWin, L"OFFLINE", L"", MB_OK);
+                flag_LogWin = 2;
+                InvalidateRect(GetParent(hWnd), NULL, FALSE);
 
-        case 2:
-        {
-            ::MessageBox(hwnd_ServerLogWin, L"UTWÓRZ KONTO", L"", MB_OK);
-            flag_LogWin = 3;
-            InvalidateRect(GetParent(hWnd), NULL, FALSE);
-        }break;
 
-        case 3:
-        {
-            ::MessageBox(hwnd_ServerLogWin, L"PRZYPOMNIJ HAS£O", L"", MB_OK);
-            flag_LogWin = 4;
-            InvalidateRect(GetParent(hWnd), NULL, FALSE);
-        }break;
+            }break;
         }// switch (wParam)
 
+        
     }break;//WM_COMMAND
 
 
     } // switch    
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
+
 
 LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {    

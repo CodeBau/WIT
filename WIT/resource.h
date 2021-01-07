@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by WIT.rc
+// Used by WiP.rc
 //
 #define IDB_BITMAP1                     101
 

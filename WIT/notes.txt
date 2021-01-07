@@ -249,3 +249,35 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	} // switch    
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
+
+
+
+
+
+RECT rc;
+        SetRect(&rc, 100, 25, 100 + button_size_x, 25 + button_size_y);
+        //::FillRect(ps.hdc, &rc, hBrush);
+
+        hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
+        SelectObject(ps.hdc, hFont);
+        SetTextColor(ps.hdc, RGB(0, 72, 0));
+        SetBkMode(ps.hdc, TRANSPARENT);
+        DrawText(ps.hdc, L"Podaj adres serwera:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+
+        SetRect(&rc, 100, 87, 100 + button_size_x, 87 + button_size_y);
+        DrawText(ps.hdc, L"Podaj has³o do serwera:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+
+        SetRect(&rc, 100, 149, 110 + button_size_x, 149 + button_size_y);
+        DrawText(ps.hdc, L"Zapamiêtaj dane logowania", -1, &rc, DT_SINGLELINE  | DT_VCENTER);
+        
+        SetRect(&rc, 100, 186, 110 + button_size_x, 186 + button_size_y);
+        DrawText(ps.hdc, L"Autologowanie", -1, &rc, DT_SINGLELINE  | DT_VCENTER);
+
+        SetRect(&rc, 50, 245, 500, 246);
+        ::FillRect(ps.hdc, &rc, hBrush);
+
+        SetRect(&rc, 100, 283, 110 + button_size_x, 283 + button_size_y);
+        DrawText(ps.hdc, L"Zawsze uruchamiaj w trybie offline", -1, &rc, DT_SINGLELINE | DT_VCENTER);
+
+
+        EndPaint(hWnd, &ps);

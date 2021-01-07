@@ -24,7 +24,7 @@
     <ProjectGuid>{5715a802-cf25-4655-9603-cf184cfd2ab1}</ProjectGuid>
     <RootNamespace>WIT</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>WIT</ProjectName>
+    <ProjectName>WiP</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -184,7 +184,7 @@
     <Text Include="notes.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="WIT.rc" />
+    <ResourceCompile Include="WiP.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="bitmap1.bmp" />
