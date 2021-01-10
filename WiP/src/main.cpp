@@ -29,6 +29,8 @@ int scrcentraly = (scry / 2) - (windy / 2);
 int window_grid = 25;
 int button_size_x = 175;
 int button_size_y = 25;
+int edit_size_x = 225;
+int edit_size_y = 25;
 
 
 struct LogWinButtonData {
@@ -137,7 +139,9 @@ void initLogWinButtonClass(HINSTANCE hInstance) {
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    
     //----ServerLogWin----------
+    {
     initServerLogWinClass(hInstance);
     hwnd_ServerLogWin = CreateWindowEx(0, L"ServerLogWinClass", L"WiP", WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION, scrcentralx, scrcentraly, windx, windy, nullptr, nullptr, hInstance, 0);
 
@@ -156,31 +160,42 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     //-----------------------
     ShowWindow(hwnd_ServerLogWin, SW_NORMAL);
     UpdateWindow(hwnd_ServerLogWin);
-
+    }
 
     //----LogWin----------
+    {
     initLogWinClass(hInstance);
     hwnd_LogWin = CreateWindowEx(0,L"LogWinClass",L"WiP",WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION,scrcentralx,scrcentraly,windx,windy,nullptr,nullptr,hInstance,0);
-    
-    hwnd_LogWin_EditLogin = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | DT_CENTER, ((windx - button_size_x) / 2), 75, button_size_x, button_size_y, hwnd_LogWin, nullptr, hInstance, nullptr);
+
+    const int EditLogin_maximum_length = 320;
+    const int EditPassword_maximum_length = 20;
+    const int EditOrganization_maximum_length = 30;
+
+    hwnd_LogWin_EditLogin = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | DT_CENTER | WS_TABSTOP |ES_AUTOHSCROLL, ((windx - edit_size_x) / 2), 75, edit_size_x, edit_size_y, hwnd_LogWin, nullptr, hInstance, nullptr);
     hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
     SendMessage(hwnd_LogWin_EditLogin, WM_SETFONT, WPARAM(hFont), TRUE);
+    SendMessage(hwnd_LogWin_EditLogin, EM_SETLIMITTEXT, EditLogin_maximum_length, 0);
 
-    hwnd_LogWin_EditPassword = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | DT_CENTER, ((windx - button_size_x) / 2), 125, button_size_x, button_size_y, hwnd_LogWin, nullptr, hInstance, nullptr);
+
+    hwnd_LogWin_EditPassword = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | DT_CENTER | WS_TABSTOP | ES_AUTOHSCROLL, ((windx - edit_size_x) / 2), 125, edit_size_x, edit_size_y, hwnd_LogWin, nullptr, hInstance, nullptr);
     SendMessage(hwnd_LogWin_EditPassword, WM_SETFONT, WPARAM(hFont), TRUE);
+    SendMessage(hwnd_LogWin_EditPassword, EM_SETLIMITTEXT, EditPassword_maximum_length, 0);
+
     
-    hwnd_LogWin_EditOrganization = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_BORDER | DT_CENTER, ((windx - button_size_x) / 2), 175, button_size_x, button_size_y, hwnd_LogWin, nullptr, hInstance, nullptr);
-    SendMessage(hwnd_LogWin_EditPassword, WM_SETFONT, WPARAM(hFont), TRUE);
+    hwnd_LogWin_EditOrganization = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_BORDER | DT_CENTER | WS_TABSTOP | ES_AUTOHSCROLL, ((windx - edit_size_x) / 2), 175, edit_size_x, edit_size_y, hwnd_LogWin, nullptr, hInstance, nullptr);
+    SendMessage(hwnd_LogWin_EditOrganization, WM_SETFONT, WPARAM(hFont), TRUE);
+    SendMessage(hwnd_LogWin_EditOrganization, EM_SETLIMITTEXT, EditOrganization_maximum_length, 0);
 
 
-    hwnd_LogWin_CheckBoxLoginData = CreateWindowEx(0, L"Button", L"", WS_CHILD | WS_VISIBLE | BS_CHECKBOX, 182, 163, 25, 25, hwnd_LogWin, (HMENU)4, hInstance, nullptr);
+
+    hwnd_LogWin_CheckBoxLoginData = CreateWindowEx(0, L"Button", L"", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | WS_TABSTOP, 182, 163, 25, 25, hwnd_LogWin, (HMENU)4, hInstance, nullptr);
     CheckDlgButton(hwnd_LogWin_CheckBoxLoginData, 4, BST_CHECKED);
     
     //--- LogWinButton ------
     initLogWinButtonClass(hInstance);
-    CreateWindowEx(0, L"LogWinButtonClass", L"B_CENTRAL", WS_CHILD | WS_VISIBLE, ((windx - button_size_x) / 2), (windy -6*window_grid), button_size_x, button_size_y, hwnd_LogWin, (HMENU)1, hInstance, nullptr);
-    CreateWindowEx(0, L"LogWinButtonClass", L"B_LEFT", WS_CHILD | WS_VISIBLE, 15, 340, 100, 15, hwnd_LogWin, (HMENU)2, hInstance, nullptr);
-    CreateWindowEx(0, L"LogWinButtonClass", L"B_RIGHT", WS_CHILD | WS_VISIBLE, 130, 340, 100, 15, hwnd_LogWin, (HMENU)3, hInstance, nullptr);
+    CreateWindowEx(0, L"LogWinButtonClass", L"B_CENTRAL", WS_CHILD | WS_VISIBLE | WS_TABSTOP, ((windx - button_size_x) / 2), (windy -6*window_grid), button_size_x, button_size_y, hwnd_LogWin, (HMENU)1, hInstance, nullptr);
+    CreateWindowEx(0, L"LogWinButtonClass", L"B_LEFT", WS_CHILD | WS_VISIBLE | WS_TABSTOP, 15, 340, 100, 15, hwnd_LogWin, (HMENU)2, hInstance, nullptr);
+    CreateWindowEx(0, L"LogWinButtonClass", L"B_RIGHT", WS_CHILD | WS_VISIBLE | WS_TABSTOP, 130, 340, 100, 15, hwnd_LogWin, (HMENU)3, hInstance, nullptr);
 
     //CreateWindowEx(0, L"Button", L"Test", WS_CHILD | WS_VISIBLE, 10, 100, 200, 40, hwnd, (HMENU)10, hInstance, nullptr);
 
@@ -188,17 +203,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     ShowWindow(hwnd_LogWin, SW_NORMAL);
     UpdateWindow(hwnd_LogWin);
 
-    
+    }
 
     // Main message loop:  
     MSG msg;
-    while (GetMessage(&msg, NULL, 0, 0))
+    while (GetMessage(&msg, 0, 0, 0) > 0)
     {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        if (!IsDialogMessage(hwnd_LogWin, &msg))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
     }
-
-    return msg.wParam;
 }
 
 int flag_LogWin = 2; // 1-servlogin, 2-acclogin, 3-registration, 4-password_remind
@@ -381,7 +397,6 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
 
                 RECT rc;
-                std::cout << "rysujemy 2 \n";
                 SetRect(&rc, ((windx - button_size_x) / 2), 50, ((windx - button_size_x) / 2) + button_size_x, 75);
                 //::FillRect(ps.hdc, &rc, hBrush);
                 hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
@@ -407,7 +422,6 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
 
                 RECT rc;
-                std::cout << "rysujemy 3 \n";
                 SetRect(&rc, ((windx - 450) / 2), 50, ((windx - 450) / 2) + 450, 75);
                 //::FillRect(ps.hdc, &rc, hBrush);
                 hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
@@ -433,7 +447,6 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
 
                 RECT rc;
-                std::cout << "rysujemy 4 \n";
                 SetRect(&rc, ((windx - 450) / 2), 50, ((windx - 450) / 2) + 450, 75);
                 //::FillRect(ps.hdc, &rc, hBrush);
                 hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
@@ -445,7 +458,6 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }break;
         }
 
-        
 
     }break;//WM_PAINT
 
@@ -634,6 +646,7 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         data->down = true;
         SetCapture(hWnd);
         InvalidateRect(hWnd, nullptr, false);
+
     }break;//WM_LBUTTONDOWN
 
     case WM_LBUTTONUP: {
@@ -664,26 +677,49 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
                 {
                     case 1:
                     {
-                        ::MessageBox(hwnd_LogWin, L"Tutaj bedzie proba logowania", L"", MB_OK);
-                       
+                        //::MessageBox(hwnd_LogWin, L"Tutaj bedzie proba logowania", L"", MB_OK);
+
+                        wchar_t login_text[512];
+                        GetWindowText(hwnd_LogWin_EditLogin, login_text, 512);
+
+                        std::wstring ws(login_text);
+                        // your new String
+                        std::string str(ws.begin(), ws.end());
+                        // Show String
+                        std::cout << "mail: " << str << std::endl;
+
+                        ::MessageBox(hwnd_LogWin, login_text, L"", MB_OK);
+
                     }break;
 
                     case 2:
                     {
+                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
+
                         //::MessageBox(hwnd_LogWin, L"UTWÓRZ KONTO", L"", MB_OK);
                         flag_LogWin = 3;
-                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
-                        //RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
+                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
                         ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
+
+                        ShowWindow(hwnd_LogWin_EditOrganization, SW_SHOW);
+
+                        ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
+
                     }break;
 
                     case 3:
                     {
+                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
+
                         //::MessageBox(hwnd_LogWin, L"PRZYPOMNIJ HAS£O", L"", MB_OK);
                         flag_LogWin = 4;
-                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
-                        //RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
+                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
                         ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
+
+                        ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
+
+                        ShowWindow(hwnd_LogWin_EditPassword, SW_HIDE);
+
                     }break;
 
                 }// switch (wParam)
@@ -701,23 +737,32 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
                     case 2:
                     {
+                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
+
                         //::MessageBox(hwnd_LogWin, L"LOGUJ", L"", MB_OK);
                         flag_LogWin = 2;
-                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
-                        //RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
+                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
                         ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
+
+                        ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
+
+                        ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
 
                     }break;
 
                     case 3:
                     {
-                        ::MessageBox(hwnd_LogWin, L"TU JEST B£¥D", L"", MB_OK);
-                        flag_LogWin = 4;
-                        std::cout << "Czy sie wykona 1 \n";
                         InvalidateRect(GetParent(hWnd), NULL, FALSE);
-                        //RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
-                        std::cout << "Czy sie wykona 2 \n";
+
+                        //::MessageBox(hwnd_LogWin, L"PRZYPOMNIJ HAS£O", L"", MB_OK);
+                        flag_LogWin = 4;
+                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
                         ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
+
+                        ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
+
+                        ShowWindow(hwnd_LogWin_EditPassword, SW_HIDE);
+
                     }break;
                 }// switch (wParam)
 
@@ -731,31 +776,43 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
                     {
                         ::MessageBox(hwnd_LogWin, L"Tutaj bêdzie próba przypomnienia has³a", L"", MB_OK);
                         
-
                     }break;
 
                     case 2:
                     {
+                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
+
                         //::MessageBox(hwnd_LogWin, L"LOGUJ", L"", MB_OK);
                         flag_LogWin = 2;
-                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
-                        //RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
+                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
                         ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
+
+                        ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
+
+                        ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
 
                     }break;
 
                     case 3:
                     {
+                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
+
                         //::MessageBox(hwnd_LogWin, L"UTWÓRZ KONTO", L"", MB_OK);
                         flag_LogWin = 3;
-                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
-                        //RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
+                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
                         ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
+
+                        ShowWindow(hwnd_LogWin_EditOrganization, SW_SHOW);
+
+                        ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
 
                     }break;
                 }// switch (wParam)
             }break;
+
         }  //flag
+        InvalidateRect(GetParent(hWnd), NULL, FALSE);
+
     }break;//WM_COMMAND
     
 
