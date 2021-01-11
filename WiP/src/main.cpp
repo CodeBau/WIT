@@ -14,8 +14,12 @@
 
 //  Declare Windows procedure  
 
-HWND hwnd_LogWin, hwnd_ServerLogWin, hwnd_ServerLogWin_EditLogin, hwnd_ServerLogWin_EditPassword, hwnd_LogWin_EditLogin, hwnd_LogWin_EditPassword, hwnd_LogWin_CheckBoxLoginData, hwnd_LogWin_EditOrganization;
+HWND hwnd_LogWin, hwnd_ServerLogWin, hwnd_ServerLogWin_EditLogin, hwnd_ServerLogWin_EditPassword, hwnd_LogWin_EditLogin, hwnd_LogWin_EditPassword, hwnd_LogWin_CheckBoxLoginData, hwnd_LogWin_EditOrganization, TIMER_5_sec;
 HFONT hFont;
+HBRUSH hBrush;
+
+char flag_LogWin = 'a'; //a-login, b-registration, c-password_reminder
+std::string show_red_allert = "nic"; //login, password, organization, all
 
 int red = 0;
 int my_counter = 0;
@@ -31,7 +35,6 @@ int button_size_x = 175;
 int button_size_y = 25;
 int edit_size_x = 225;
 int edit_size_y = 25;
-
 
 struct LogWinButtonData {
     bool down = false;
@@ -49,15 +52,11 @@ void font_and_text_set(int x, int y, PAINTSTRUCT &ps, LPCWSTR text, RECT rc)
     DrawText(ps.hdc, text, -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 }
 
-
 LRESULT CALLBACK ServerLogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK ServerLogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-
 LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-
 
 void initServerLogWinClass(HINSTANCE hInstance) {
     WNDCLASSEX wcex;
@@ -136,10 +135,8 @@ void initLogWinButtonClass(HINSTANCE hInstance) {
 }
 
 
-
-
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-    
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) 
+{
     //----ServerLogWin----------
     {
     initServerLogWinClass(hInstance);
@@ -176,21 +173,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     SendMessage(hwnd_LogWin_EditLogin, WM_SETFONT, WPARAM(hFont), TRUE);
     SendMessage(hwnd_LogWin_EditLogin, EM_SETLIMITTEXT, EditLogin_maximum_length, 0);
 
-
     hwnd_LogWin_EditPassword = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | DT_CENTER | WS_TABSTOP | ES_AUTOHSCROLL, ((windx - edit_size_x) / 2), 125, edit_size_x, edit_size_y, hwnd_LogWin, nullptr, hInstance, nullptr);
     SendMessage(hwnd_LogWin_EditPassword, WM_SETFONT, WPARAM(hFont), TRUE);
     SendMessage(hwnd_LogWin_EditPassword, EM_SETLIMITTEXT, EditPassword_maximum_length, 0);
 
-    
     hwnd_LogWin_EditOrganization = CreateWindowEx(0, L"Edit", L"", WS_CHILD | WS_BORDER | DT_CENTER | WS_TABSTOP | ES_AUTOHSCROLL, ((windx - edit_size_x) / 2), 175, edit_size_x, edit_size_y, hwnd_LogWin, nullptr, hInstance, nullptr);
     SendMessage(hwnd_LogWin_EditOrganization, WM_SETFONT, WPARAM(hFont), TRUE);
     SendMessage(hwnd_LogWin_EditOrganization, EM_SETLIMITTEXT, EditOrganization_maximum_length, 0);
 
-
-
-    hwnd_LogWin_CheckBoxLoginData = CreateWindowEx(0, L"Button", L"", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | WS_TABSTOP, 182, 163, 25, 25, hwnd_LogWin, (HMENU)4, hInstance, nullptr);
+    hwnd_LogWin_CheckBoxLoginData = CreateWindowEx(0, L"Button", L"Zapamiêtaj dane logowania", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | WS_TABSTOP, ((windx - 210) / 2), 163+25, 210, 25, hwnd_LogWin, (HMENU)4, hInstance, nullptr);
     CheckDlgButton(hwnd_LogWin_CheckBoxLoginData, 4, BST_CHECKED);
-    
+
+    SendMessage(hwnd_LogWin_CheckBoxLoginData, WM_SETFONT, WPARAM(hFont), TRUE);
+
     //--- LogWinButton ------
     initLogWinButtonClass(hInstance);
     CreateWindowEx(0, L"LogWinButtonClass", L"B_CENTRAL", WS_CHILD | WS_VISIBLE | WS_TABSTOP, ((windx - button_size_x) / 2), (windy -6*window_grid), button_size_x, button_size_y, hwnd_LogWin, (HMENU)1, hInstance, nullptr);
@@ -216,8 +211,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         }
     }
 }
-
-int flag_LogWin = 2; // 1-servlogin, 2-acclogin, 3-registration, 4-password_remind
 
 LRESULT CALLBACK ServerLogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -384,108 +377,155 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {    
     switch (message)
     {
-        case WM_PAINT: {
+        case WM_TIMER:
+        {
+            printf("WM_TIMER %d", wParam);
+            std::cout <<  "\n";
 
+            switch (wParam)
+            {
+                case 1001:
+                {
+                    InvalidateRect(GetParent(hWnd), NULL, FALSE);
+                    std::cout << "wylaczamy zegar\n";
+                    KillTimer(hWnd,1001);
+                    show_red_allert = "nic";
+                };
+            }
+        }break;//WM_TIMER
+        
+        case WM_CTLCOLORSTATIC:
+        {
+            HDC hDC = (HDC)wParam;
+            HWND hWndControl = (HWND)lParam;
+            if (hwnd_LogWin_CheckBoxLoginData == hWndControl)
+            {
+                SetTextColor(hDC, RGB(0, 72, 0));
+                SetBkMode(hDC, TRANSPARENT);
+                return (LRESULT)GetStockObject(NULL_BRUSH);
+            }
+        }break;//WM_CTLCOLORSTATIC
+
+        case WM_PAINT: 
+        {
             switch (flag_LogWin)
             {
-            case 2:
-            {
-                PAINTSTRUCT ps;
-                BeginPaint(hWnd, &ps);
+                case 'a':
+                {
+                    PAINTSTRUCT ps;
+                    BeginPaint(hWnd, &ps);
 
-                HBRUSH hBrush;
-                hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
+                    hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
 
-                RECT rc;
-                SetRect(&rc, ((windx - button_size_x) / 2), 50, ((windx - button_size_x) / 2) + button_size_x, 75);
-                //::FillRect(ps.hdc, &rc, hBrush);
-                hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
-                SelectObject(ps.hdc, hFont);
-                SetTextColor(ps.hdc, RGB(0, 72, 0));
-                SetBkMode(ps.hdc, TRANSPARENT);
-                DrawText(ps.hdc, L"Podaj login:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    RECT rc;
+                    SetRect(&rc, ((windx - button_size_x) / 2), 50, ((windx - button_size_x) / 2) + button_size_x, 75);
+                    //::FillRect(ps.hdc, &rc, hBrush);
+                    hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
+                    SelectObject(ps.hdc, hFont);
+                    SetTextColor(ps.hdc, RGB(0, 72, 0));
+                    SetBkMode(ps.hdc, TRANSPARENT);
+                    DrawText(ps.hdc, L"Podaj login:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
-                SetRect(&rc, ((windx - button_size_x) / 2), 100, ((windx - button_size_x) / 2) + button_size_x, 125);
-                DrawText(ps.hdc, L"Podaj has³o:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    SetRect(&rc, ((windx - button_size_x) / 2), 100, ((windx - button_size_x) / 2) + button_size_x, 125);
+                    DrawText(ps.hdc, L"Podaj has³o:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
-                SetRect(&rc, 208, 163, 393, 188);
-                DrawText(ps.hdc, L"Zapamiêtaj dane logowania", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
-                EndPaint(hWnd, &ps);
-            }break;
+                    if (show_red_allert == "login")
+                    {
+                        SetTextColor(ps.hdc, RGB(255, 43, 0));
+                        SetRect(&rc, ((windx - button_size_x) / 2), 150, ((windx - button_size_x) / 2) + button_size_x, 175);
+                        DrawText(ps.hdc, L"Uzupe³nij pole loginu!", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    }
+                    else if (show_red_allert == "password")
+                    {
+                        SetTextColor(ps.hdc, RGB(255, 43, 0));
+                        SetRect(&rc, ((windx - button_size_x) / 2), 150, ((windx - button_size_x) / 2) + button_size_x, 175);
+                        DrawText(ps.hdc, L"Uzupe³nij pole has³a!", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    }
+                    else if (show_red_allert == "all")
+                    {
+                        SetTextColor(ps.hdc, RGB(255, 43, 0));
+                        SetRect(&rc, ((windx - button_size_x) / 2), 150, ((windx - button_size_x) / 2) + button_size_x, 175);
+                        DrawText(ps.hdc, L"Uzupe³nij pola!", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    }
 
-            case 3:
-            {
-                PAINTSTRUCT ps;
-                BeginPaint(hWnd, &ps);
+                }break;
 
-                HBRUSH hBrush;
-                hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
+                case 'b':
+                {
+                    PAINTSTRUCT ps;
+                    BeginPaint(hWnd, &ps);
 
-                RECT rc;
-                SetRect(&rc, ((windx - 450) / 2), 50, ((windx - 450) / 2) + 450, 75);
-                //::FillRect(ps.hdc, &rc, hBrush);
-                hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
-                SelectObject(ps.hdc, hFont);
-                SetTextColor(ps.hdc, RGB(0, 72, 0));
-                SetBkMode(ps.hdc, TRANSPARENT);
-                DrawText(ps.hdc, L"Podaj adres e-mail (adres e-mail jest jednoczeœnie loginem):", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
 
-                SetRect(&rc, ((windx - button_size_x) / 2), 100, ((windx - button_size_x) / 2) + button_size_x, 125);
-                DrawText(ps.hdc, L"Utwórz has³o logowania:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    RECT rc;
+                    SetRect(&rc, ((windx - 450) / 2), 50, ((windx - 450) / 2) + 450, 75);
+                    //::FillRect(ps.hdc, &rc, hBrush);
+                    hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
+                    SelectObject(ps.hdc, hFont);
+                    SetTextColor(ps.hdc, RGB(0, 72, 0));
+                    SetBkMode(ps.hdc, TRANSPARENT);
+                    DrawText(ps.hdc, L"Podaj adres e-mail (adres e-mail jest jednoczeœnie loginem):", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
-                SetRect(&rc, ((windx - button_size_x) / 2), 150, ((windx - button_size_x) / 2) + button_size_x, 175);
-                DrawText(ps.hdc, L"Podaj nazwê organizacji:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
-                EndPaint(hWnd, &ps);
-            }break;
+                    SetRect(&rc, ((windx - button_size_x) / 2), 100, ((windx - button_size_x) / 2) + button_size_x, 125);
+                    DrawText(ps.hdc, L"Utwórz has³o logowania:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
-            case 4:
-            {
-                PAINTSTRUCT ps;
-                BeginPaint(hWnd, &ps);
+                    SetRect(&rc, ((windx - button_size_x) / 2), 150, ((windx - button_size_x) / 2) + button_size_x, 175);
+                    DrawText(ps.hdc, L"Podaj nazwê organizacji:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    EndPaint(hWnd, &ps);
+                }break;
 
-                HBRUSH hBrush;
-                hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
+                case 'c':
+                {
+                    PAINTSTRUCT ps;
+                    BeginPaint(hWnd, &ps);
 
-                RECT rc;
-                SetRect(&rc, ((windx - 450) / 2), 50, ((windx - 450) / 2) + 450, 75);
-                //::FillRect(ps.hdc, &rc, hBrush);
-                hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
-                SelectObject(ps.hdc, hFont);
-                SetTextColor(ps.hdc, RGB(0, 72, 0));
-                SetBkMode(ps.hdc, TRANSPARENT);
-                DrawText(ps.hdc, L"Podaj adres e-mail:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
-                EndPaint(hWnd, &ps);
-            }break;
-        }
+                    hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
 
-
-    }break;//WM_PAINT
-
-
-    case WM_COMMAND:
-    {
-        switch (LOWORD(wParam))
-        { 
-        case 4:
-            int checked = IsDlgButtonChecked(hWnd, 4);
-            if (checked) {
-                CheckDlgButton(hWnd, 4, BST_UNCHECKED);
+                    RECT rc;
+                    SetRect(&rc, ((windx - 450) / 2), 50, ((windx - 450) / 2) + 450, 75);
+                    //::FillRect(ps.hdc, &rc, hBrush);
+                    hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
+                    SelectObject(ps.hdc, hFont);
+                    SetTextColor(ps.hdc, RGB(0, 72, 0));
+                    SetBkMode(ps.hdc, TRANSPARENT);
+                    DrawText(ps.hdc, L"Podaj adres e-mail:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+                    EndPaint(hWnd, &ps);
+                }break;
             }
-            else {
-                CheckDlgButton(hWnd, 4, BST_CHECKED);
-            }
-        }
-        break;//WM_COMMAND
-    }
+        }break;//WM_PAINT
 
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
-    }
+        case WM_COMMAND:
+        {
+            switch (LOWORD(wParam))
+            { 
+                case 4:
+                {
+                    int checked = IsDlgButtonChecked(hWnd, 4);
+                    if (checked) {
+                        CheckDlgButton(hWnd, 4, BST_UNCHECKED);
+                    }
+                    else {
+                        CheckDlgButton(hWnd, 4, BST_CHECKED);
+                    }
+                }
+            }break;//(LOWORD(wParam))
+        }break;//WM_COMMAND
+
+        case WM_DESTROY:
+        {
+            PostQuitMessage(0);
+            
+        }break;//WM_DESTROY:
+
+        default:
+        {
+            return DefWindowProc(hWnd, message, wParam, lParam);
+
+        }break;//default:
+    }//(message)
+
     return 0;
-}
+}//CALLBACK LogWin
 
 LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -494,331 +534,369 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
     switch (message)
     {
-    case WM_CREATE: {
-        auto* data = new LogWinButtonData();
-        SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<intptr_t>(data));
-    }break;
+        case WM_CREATE: {
+            auto* data = new LogWinButtonData();
+            SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<intptr_t>(data));
+        }break;
 
-    case WM_DESTROY: {
-        auto* data = reinterpret_cast<LogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-        delete data;
-    }break;
+        case WM_DESTROY: {
+            auto* data = reinterpret_cast<LogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+            delete data;
+        }break;
 
-    case WM_PAINT: {
-        auto* data = reinterpret_cast<LogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-        PAINTSTRUCT ps;
-        BeginPaint(hWnd, &ps);
+        case WM_PAINT: {
+            auto* data = reinterpret_cast<LogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+            PAINTSTRUCT ps;
+            BeginPaint(hWnd, &ps);
 
-        RECT rc;
-        HBRUSH hBrush;
-        GetClientRect(hWnd, &rc);
-        Rectangle(ps.hdc, rc.left, rc.top, rc.right, rc.bottom);
+            RECT rc;
+            GetClientRect(hWnd, &rc);
+            Rectangle(ps.hdc, rc.left, rc.top, rc.right, rc.bottom);
 
-        wchar_t text[512];
-        GetWindowText(hWnd, text, 512);
-        SetBkMode(ps.hdc, TRANSPARENT);
+            wchar_t text[512];
+            GetWindowText(hWnd, text, 512);
+            SetBkMode(ps.hdc, TRANSPARENT);
 
-        if (data->down)
-        {
-            SetTextColor(ps.hdc, RGB(240, 240, 240));
-            hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
-            ::FillRect(ps.hdc, &rc, hBrush);
+            if (data->down)
+            {
+                SetTextColor(ps.hdc, RGB(240, 240, 240));
+                hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
+                ::FillRect(ps.hdc, &rc, hBrush);
            
-            switch (flag_LogWin)
-            {
-            case 2:
-            {
-                if (wcscmp(text, L"B_CENTRAL") == 0)
+                switch (flag_LogWin)
                 {
-                    font_and_text_set(normal_font, 700, ps, L"zaloguj", rc);
-                }
-                else if (wcscmp(text, L"B_LEFT") == 0)
+                case 'a':
                 {
-                    font_and_text_set(small_font, 700, ps, L"utwórz konto", rc);
-                }
-                else if (wcscmp(text, L"B_RIGHT") == 0)
-                {
-                    font_and_text_set(small_font, 700, ps, L"przypomnij has³o", rc);
-                }
-            }break;
+                    if (wcscmp(text, L"B_CENTRAL") == 0)
+                    {
+                        font_and_text_set(normal_font, 700, ps, L"zaloguj", rc);
+                    }
+                    else if (wcscmp(text, L"B_LEFT") == 0)
+                    {
+                        font_and_text_set(small_font, 700, ps, L"utwórz konto", rc);
+                    }
+                    else if (wcscmp(text, L"B_RIGHT") == 0)
+                    {
+                        font_and_text_set(small_font, 700, ps, L"przypomnij has³o", rc);
+                    }
+                }break;
 
-            case 3:
-            {
-                if (wcscmp(text, L"B_CENTRAL") == 0)
+                case 'b':
                 {
-                    font_and_text_set(normal_font, 700, ps, L"utwórz konto", rc);
-                }
-                else if (wcscmp(text, L"B_LEFT") == 0)
-                {
-                    font_and_text_set(small_font, 700, ps, L"zaloguj", rc);
-                }
-                else if (wcscmp(text, L"B_RIGHT") == 0)
-                {
-                    font_and_text_set(small_font, 700, ps, L"przypomnij has³o", rc);
-                }
+                    if (wcscmp(text, L"B_CENTRAL") == 0)
+                    {
+                        font_and_text_set(normal_font, 700, ps, L"utwórz konto", rc);
+                    }
+                    else if (wcscmp(text, L"B_LEFT") == 0)
+                    {
+                        font_and_text_set(small_font, 700, ps, L"zaloguj", rc);
+                    }
+                    else if (wcscmp(text, L"B_RIGHT") == 0)
+                    {
+                        font_and_text_set(small_font, 700, ps, L"przypomnij has³o", rc);
+                    }
 
-            }break;
+                }break;
 
-            case 4:
-            {
-                if (wcscmp(text, L"B_CENTRAL") == 0)
+                case 'c':
                 {
-                    font_and_text_set(normal_font, 700, ps, L"przypomnij has³o", rc);
+                    if (wcscmp(text, L"B_CENTRAL") == 0)
+                    {
+                        font_and_text_set(normal_font, 700, ps, L"przypomnij has³o", rc);
+                    }
+                    else if (wcscmp(text, L"B_LEFT") == 0)
+                    {
+                        font_and_text_set(small_font, 700, ps, L"zaloguj", rc);
+                    }
+                    else if (wcscmp(text, L"B_RIGHT") == 0)
+                    {
+                        font_and_text_set(small_font, 700, ps, L"utwórz konto", rc);
+                    }
+                }break;
+
                 }
-                else if (wcscmp(text, L"B_LEFT") == 0)
-                {
-                    font_and_text_set(small_font, 700, ps, L"zaloguj", rc);
-                }
-                else if (wcscmp(text, L"B_RIGHT") == 0)
-                {
-                    font_and_text_set(small_font, 700, ps, L"utwórz konto", rc);
-                }
-            }break;
 
             }
+            else
+            {
+                SetTextColor(ps.hdc, RGB(0, 72, 0));
+                SelectObject(ps.hdc, GetStockObject(WHITE_BRUSH));
 
-        }
-        else
+                switch (flag_LogWin)
+                {
+                case 'a':
+                {
+                    if (wcscmp(text, L"B_CENTRAL") == 0)
+                    {
+                        font_and_text_set(normal_font, 300, ps, L"zaloguj", rc);
+                    }
+                    else if (wcscmp(text, L"B_LEFT") == 0)
+                    {
+                        font_and_text_set(small_font, 300, ps, L"utwórz konto", rc);
+                    }
+                    else if (wcscmp(text, L"B_RIGHT") == 0)
+                    {
+                        font_and_text_set(small_font, 300, ps, L"przypomnij has³o", rc);
+                    }
+                }break;
+
+                case 'b':
+                {
+                    if (wcscmp(text, L"B_CENTRAL") == 0)
+                    {
+                        font_and_text_set(normal_font, 300, ps, L"utwórz konto", rc);
+                    }
+                    else if (wcscmp(text, L"B_LEFT") == 0)
+                    {
+                        font_and_text_set(small_font, 300, ps, L"zaloguj", rc);
+                    }
+                    else if (wcscmp(text, L"B_RIGHT") == 0)
+                    {
+                        font_and_text_set(small_font, 300, ps, L"przypomnij has³o", rc);
+                    }
+
+                }break;
+
+                case 'c':
+                {
+                    if (wcscmp(text, L"B_CENTRAL") == 0)
+                    {
+                        font_and_text_set(normal_font, 300, ps, L"przypomnij has³o", rc);
+                    }
+                    else if (wcscmp(text, L"B_LEFT") == 0)
+                    {
+                        font_and_text_set(small_font, 300, ps, L"zaloguj", rc);
+                    }
+                    else if (wcscmp(text, L"B_RIGHT") == 0)
+                    {
+                        font_and_text_set(small_font, 300, ps, L"utwórz konto", rc);
+                    }
+                }break;
+
+                }
+            }
+
+            EndPaint(hWnd, &ps);
+
+        }break;//WM_PAINT
+
+        case WM_LBUTTONDOWN: {
+            auto* data = reinterpret_cast<LogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+            data->down = true;
+            SetCapture(hWnd);
+            InvalidateRect(hWnd, nullptr, false);
+
+        }break;//WM_LBUTTONDOWN
+
+        case WM_LBUTTONUP: {
+            auto* data = reinterpret_cast<LogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+            data->down = false;
+            ReleaseCapture();
+            InvalidateRect(hWnd, nullptr, false);
+
+            auto x = GET_X_LPARAM(lParam);
+            auto y = GET_Y_LPARAM(lParam);
+
+            RECT rc;
+            GetClientRect(hWnd, &rc);
+
+            if (isInsideRect(rc, x, y)) 
+            {
+                SendMessage(hWnd, WM_COMMAND, (WPARAM)GetMenu(hWnd), 0);
+            }
+        }break;//WM_LBUTTONUP
+
+        case WM_COMMAND:
         {
-            SetTextColor(ps.hdc, RGB(0, 72, 0));
-            SelectObject(ps.hdc, GetStockObject(WHITE_BRUSH));
-
             switch (flag_LogWin)
             {
-            case 2:
-            {
-                if (wcscmp(text, L"B_CENTRAL") == 0)
+                case 'a':
                 {
-                    font_and_text_set(normal_font, 300, ps, L"zaloguj", rc);
-                }
-                else if (wcscmp(text, L"B_LEFT") == 0)
-                {
-                    font_and_text_set(small_font, 300, ps, L"utwórz konto", rc);
-                }
-                else if (wcscmp(text, L"B_RIGHT") == 0)
-                {
-                    font_and_text_set(small_font, 300, ps, L"przypomnij has³o", rc);
-                }
-            }break;
-
-            case 3:
-            {
-                if (wcscmp(text, L"B_CENTRAL") == 0)
-                {
-                    font_and_text_set(normal_font, 300, ps, L"utwórz konto", rc);
-                }
-                else if (wcscmp(text, L"B_LEFT") == 0)
-                {
-                    font_and_text_set(small_font, 300, ps, L"zaloguj", rc);
-                }
-                else if (wcscmp(text, L"B_RIGHT") == 0)
-                {
-                    font_and_text_set(small_font, 300, ps, L"przypomnij has³o", rc);
-                }
-
-            }break;
-
-            case 4:
-            {
-                if (wcscmp(text, L"B_CENTRAL") == 0)
-                {
-                    font_and_text_set(normal_font, 300, ps, L"przypomnij has³o", rc);
-                }
-                else if (wcscmp(text, L"B_LEFT") == 0)
-                {
-                    font_and_text_set(small_font, 300, ps, L"zaloguj", rc);
-                }
-                else if (wcscmp(text, L"B_RIGHT") == 0)
-                {
-                    font_and_text_set(small_font, 300, ps, L"utwórz konto", rc);
-                }
-            }break;
-
-            }
-        }
-
-        EndPaint(hWnd, &ps);
-
-    }break;//WM_PAINT
-
-    case WM_LBUTTONDOWN: {
-        auto* data = reinterpret_cast<LogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-        data->down = true;
-        SetCapture(hWnd);
-        InvalidateRect(hWnd, nullptr, false);
-
-    }break;//WM_LBUTTONDOWN
-
-    case WM_LBUTTONUP: {
-        auto* data = reinterpret_cast<LogWinButtonData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-        data->down = false;
-        ReleaseCapture();
-        InvalidateRect(hWnd, nullptr, false);
-
-        auto x = GET_X_LPARAM(lParam);
-        auto y = GET_Y_LPARAM(lParam);
-
-        RECT rc;
-        GetClientRect(hWnd, &rc);
-
-        if (isInsideRect(rc, x, y)) 
-        {
-            SendMessage(hWnd, WM_COMMAND, (WPARAM)GetMenu(hWnd), 0);
-        }
-    }break;//WM_LBUTTONUP
-
-    case WM_COMMAND:
-    {
-        switch (flag_LogWin)
-        {
-            case 2:
-            {
-                switch (wParam)
-                {
-                    case 1:
+                    switch (wParam)
                     {
-                        //::MessageBox(hwnd_LogWin, L"Tutaj bedzie proba logowania", L"", MB_OK);
+                        case 1:
+                        {
 
-                        wchar_t login_text[512];
-                        GetWindowText(hwnd_LogWin_EditLogin, login_text, 512);
+                            //::MessageBox(hwnd_LogWin, L"Tutaj bedzie proba logowania", L"", MB_OK);
 
-                        std::wstring ws(login_text);
-                        // your new String
-                        std::string str(ws.begin(), ws.end());
-                        // Show String
-                        std::cout << "mail: " << str << std::endl;
+                            wchar_t login_text[512];
+                            GetWindowText(hwnd_LogWin_EditLogin, login_text, 512);
+                            std::wstring ws_login_text(login_text);// your new String
+                            std::string str_login_text(ws_login_text.begin(), ws_login_text.end());// Show String
+                            
+                            wchar_t password_text[512];
+                            GetWindowText(hwnd_LogWin_EditPassword, password_text, 512);
+                            std::wstring ws_password_text(password_text);// your new String
+                            std::string str_password_text(ws_password_text.begin(), ws_password_text.end());// Show String
 
-                        ::MessageBox(hwnd_LogWin, login_text, L"", MB_OK);
+                            if (str_password_text="")
 
-                    }break;
 
-                    case 2:
-                    {
-                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
 
-                        //::MessageBox(hwnd_LogWin, L"UTWÓRZ KONTO", L"", MB_OK);
-                        flag_LogWin = 3;
-                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
-                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
+                            std::cout << "Mail: " << str_login_text << std::endl;
+                            std::cout << "Password: " << str_password_text << std::endl;
 
-                        ShowWindow(hwnd_LogWin_EditOrganization, SW_SHOW);
+                            std::string comm_text("Login: " + str_login_text + "\n" + "Password: "  + str_password_text);
+                            std::wstring ws_comm_text(comm_text.begin(), comm_text.end());
+                            LPCWSTR wide_string;
+                            wide_string = ws_comm_text.c_str();
 
-                        ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
+                            ::MessageBox(hwnd_LogWin, wide_string, L"Login data", MB_OK);
 
-                    }break;
+                            SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
+                            std::cout << "Resetujemy zegar \n";
+                            std::cout << "Wlaczamy napis \n";
+                            show_red_allert = "login";
 
-                    case 3:
-                    {
-                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
+                            InvalidateRect(GetParent(hWnd), NULL, FALSE);
 
-                        //::MessageBox(hwnd_LogWin, L"PRZYPOMNIJ HAS£O", L"", MB_OK);
-                        flag_LogWin = 4;
-                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
-                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
 
-                        ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
 
-                        ShowWindow(hwnd_LogWin_EditPassword, SW_HIDE);
+                        }break;
 
-                    }break;
+                        case 2:
+                        {
+                            InvalidateRect(GetParent(hWnd), NULL, FALSE);
 
-                }// switch (wParam)
-            }break;
+                            //::MessageBox(hwnd_LogWin, L"UTWÓRZ KONTO", L"", MB_OK);
+                            flag_LogWin = 'b';
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
 
-            case 3:
-            {
-                switch (wParam)
+                            ShowWindow(hwnd_LogWin_EditOrganization, SW_SHOW);
+
+                            ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
+
+                            show_red_allert = "nic";
+
+
+                        }break;
+
+                        case 3:
+                        {
+                            InvalidateRect(GetParent(hWnd), NULL, FALSE);
+
+                            //::MessageBox(hwnd_LogWin, L"PRZYPOMNIJ HAS£O", L"", MB_OK);
+                            flag_LogWin = 'c';
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
+
+                            ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
+
+                            ShowWindow(hwnd_LogWin_EditPassword, SW_HIDE);
+
+                            show_red_allert = "nic";
+
+
+                        }break;
+
+                    }// switch (wParam)
+                }break;
+
+                case 'b':
                 {
-                    case 1:
+                    switch (wParam)
                     {
-                        ::MessageBox(hwnd_LogWin, L"Tutaj bêdzie próba utworzenia konta", L"", MB_OK);
+                        case 1:
+                        {
+                            ::MessageBox(hwnd_LogWin, L"Tutaj bêdzie próba utworzenia konta", L"", MB_OK);
                         
-                    }break;
+                        }break;
 
-                    case 2:
-                    {
-                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
+                        case 2:
+                        {
+                            InvalidateRect(GetParent(hWnd), NULL, FALSE);
 
-                        //::MessageBox(hwnd_LogWin, L"LOGUJ", L"", MB_OK);
-                        flag_LogWin = 2;
-                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
-                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
+                            //::MessageBox(hwnd_LogWin, L"LOGUJ", L"", MB_OK);
+                            flag_LogWin = 'a';
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
 
-                        ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
+                            ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
 
-                        ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
+                            ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
 
-                    }break;
+                            show_red_allert = "nic";
 
-                    case 3:
-                    {
-                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
 
-                        //::MessageBox(hwnd_LogWin, L"PRZYPOMNIJ HAS£O", L"", MB_OK);
-                        flag_LogWin = 4;
-                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
-                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
+                        }break;
 
-                        ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
+                        case 3:
+                        {
+                            InvalidateRect(GetParent(hWnd), NULL, FALSE);
 
-                        ShowWindow(hwnd_LogWin_EditPassword, SW_HIDE);
+                            //::MessageBox(hwnd_LogWin, L"PRZYPOMNIJ HAS£O", L"", MB_OK);
+                            flag_LogWin = 'c';
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
 
-                    }break;
-                }// switch (wParam)
+                            ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
 
-            }break;
+                            ShowWindow(hwnd_LogWin_EditPassword, SW_HIDE);
 
-            case 4:
-            {
-                switch (wParam)
+                            show_red_allert = "nic";
+
+
+                        }break;
+                    }// switch (wParam)
+
+                }break;
+
+                case 'c':
                 {
-                    case 1:
+                    switch (wParam)
                     {
-                        ::MessageBox(hwnd_LogWin, L"Tutaj bêdzie próba przypomnienia has³a", L"", MB_OK);
+                        case 1:
+                        {
+                            ::MessageBox(hwnd_LogWin, L"Tutaj bêdzie próba przypomnienia has³a", L"", MB_OK);
                         
-                    }break;
+                        }break;
 
-                    case 2:
-                    {
-                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
+                        case 2:
+                        {
+                            InvalidateRect(GetParent(hWnd), NULL, FALSE);
 
-                        //::MessageBox(hwnd_LogWin, L"LOGUJ", L"", MB_OK);
-                        flag_LogWin = 2;
-                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
-                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
+                            //::MessageBox(hwnd_LogWin, L"LOGUJ", L"", MB_OK);
+                            flag_LogWin = 'a';
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
 
-                        ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
+                            ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
 
-                        ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
+                            ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
 
-                    }break;
+                            show_red_allert = "nic";
 
-                    case 3:
-                    {
-                        InvalidateRect(GetParent(hWnd), NULL, FALSE);
 
-                        //::MessageBox(hwnd_LogWin, L"UTWÓRZ KONTO", L"", MB_OK);
-                        flag_LogWin = 3;
-                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
-                        ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
+                        }break;
 
-                        ShowWindow(hwnd_LogWin_EditOrganization, SW_SHOW);
+                        case 3:
+                        {
+                            InvalidateRect(GetParent(hWnd), NULL, FALSE);
 
-                        ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
+                            //::MessageBox(hwnd_LogWin, L"UTWÓRZ KONTO", L"", MB_OK);
+                            flag_LogWin = 'b';
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
+                            ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
 
-                    }break;
-                }// switch (wParam)
-            }break;
+                            ShowWindow(hwnd_LogWin_EditOrganization, SW_SHOW);
 
-        }  //flag
-        InvalidateRect(GetParent(hWnd), NULL, FALSE);
+                            ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
 
-    }break;//WM_COMMAND
-    
+                            show_red_allert = "nic";
 
-    } // switch    
+
+                        }break;
+                    }// switch (wParam)
+                }break;//case 4:
+            }//switch (flag_LogWin)
+        }break;//WM_COMMAND
+    }//switch (message)
+
     return DefWindowProc(hWnd, message, wParam, lParam);
-}
+}//CALLBACK LogWinButton
 
 int main() {
     return WinMain(GetModuleHandle(nullptr), nullptr, GetCommandLineA(), SW_NORMAL);
