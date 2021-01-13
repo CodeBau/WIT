@@ -23,9 +23,11 @@ inline void my_bzero(T& s) {
 	memset(&s, 0, sizeof(s));
 }
 
-
 HFONT f_myfont(int font_size, LPCWSTR font_type);
 
 std::string f_wchar_t2str(wchar_t text[512]);
 
 char* tr(char* str);
+
+int f_wchar_t_lenght(wchar_t text[]);
+int f_at_in_login(wchar_t text[]);

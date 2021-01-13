@@ -380,25 +380,17 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_TIMER:
 	{
-		/*
-		case WM_ERASEBKGND:
-		{
-			return FALSE;
-		}break;//WM_ERASEBKGND
-		*/
-
 		switch (wParam)
 		{
-		case 1001:
-		{
+			case 1001:
+			{
+				std::cout << "wylaczamy zegar\n";
+				KillTimer(hWnd, 1001);
+				show_red_allert = L"nic";
 
-			std::cout << "wylaczamy zegar\n";
-			KillTimer(hWnd, 1001);
-			show_red_allert = L"nic";
-
-			InvalidateRect(GetParent(hWnd), NULL, FALSE);
-
-		};
+				InvalidateRect(hwnd_LogWin, NULL, true);
+				UpdateWindow(hwnd_LogWin);
+			};
 		}
 	}break;//WM_TIMER
 
@@ -715,33 +707,50 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 			{
 			case 1:
 			{
-				UpdateWindow(hwnd_LogWin);
-				InvalidateRect(GetParent(hWnd), NULL, FALSE);
-
 				//::MessageBox(hwnd_LogWin, L"Tutaj bedzie proba logowania", L"", MB_OK);
 
 				wchar_t login_text[512];
 				GetWindowText(hwnd_LogWin_EditLogin, login_text, 512);
-
+				std::wcout << login_text << "\n";
+				std::wcout << f_at_in_login(login_text) << "\n";
 				wchar_t password_text[512];
 				GetWindowText(hwnd_LogWin_EditPassword, password_text, 512);
 
-				//if (str_password_text = "")
+				if (f_wchar_t_lenght(login_text) != 0 && f_wchar_t_lenght(password_text) != 0)
+				{
+					if (f_at_in_login(login_text) == -1)
+					{
+						SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
+						show_red_allert = L"login jest loginem";
 
-				//concatenating strings and replacing std :: string with LPCWSTR
-				std::string comm_text("Login: " + f_wchar_t2str(login_text) + "\n" + "Password: " + f_wchar_t2str(password_text));
-				std::wstring ws_comm_text(comm_text.begin(), comm_text.end());
-				LPCWSTR wide_string = ws_comm_text.c_str();
-
-				::MessageBox(hwnd_LogWin, wide_string, login_text, MB_OK);
-
-
-				SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
-				std::cout << "Resetujemy zegar \n";
-				std::cout << "Wlaczamy napis \n";
-				show_red_allert = L"login ¹œæ";
+					}
+					else if (f_at_in_login(login_text) != -1)
+					{
+						int login_lenght = f_at_in_login(login_text);
+						for (int i=0; i<= login_lenght; i++)
 
 
+						SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
+						show_red_allert = L"login jest mailem";
+					}
+				}
+				else if (f_wchar_t_lenght(login_text) == 0 && f_wchar_t_lenght(password_text) == 0)
+				{
+					SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
+					show_red_allert = L"Uzupe³nij pola";
+				}
+				else if (f_wchar_t_lenght(login_text) == 0 && f_wchar_t_lenght(password_text) != 0)
+				{
+					SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
+					show_red_allert = L"Uzupe³nij login";
+				}
+				else if (f_wchar_t_lenght(login_text) != 0 && f_wchar_t_lenght(password_text) == 0)
+				{
+					SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
+					show_red_allert = L"Uzupe³nij has³o";
+				}
+				
+				/*
 				for (int i = 0; i <= 511; i++)
 				{
 					std::cout << login_text[i] << "\n";
@@ -751,9 +760,11 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 					else if (login_text[i+1] == 0)
 						break;
 				}
+				*/
+
 				//           to jest 8 od 165     wiapi
-				std::cout << "\245 \n"; //¹       261      165
-				std::cout << "\206 \n"; //æ       263      134
+				//std::cout << "\245 \n"; //¹       261      165
+				//std::cout << "\206 \n"; //æ       263      134
 				
 
 				std::string comm_text1="To\245, \261, \165";
@@ -761,24 +772,17 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 				std::wstring ws_comm_text1=L"To ¹ œæ";
 				LPCWSTR wide_string1 = ws_comm_text1.c_str();
 
-				::MessageBox(hwnd_LogWin, wide_string1, L"nowe", MB_OK);
-				
-				InvalidateRect(GetParent(hWnd), NULL, FALSE);
+				//::MessageBox(hwnd_LogWin, wide_string1, L"nowe", MB_OK);
 
-				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
-				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
-
-
+				InvalidateRect(hwnd_LogWin, NULL, true);
+				UpdateWindow(hwnd_LogWin);
 
 			}break;
 
 			case 2:
 			{
-				InvalidateRect(GetParent(hWnd), NULL, FALSE);
-
 				//::MessageBox(hwnd_LogWin, L"UTWÓRZ KONTO", L"", MB_OK);
 				flag_LogWin = 'b';
-				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
 				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
 
 				ShowWindow(hwnd_LogWin_EditOrganization, SW_SHOW);
@@ -787,16 +791,15 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 				show_red_allert = L"nic";
 
+				InvalidateRect(hwnd_LogWin, NULL, true);
+				UpdateWindow(hwnd_LogWin);
 
 			}break;
 
 			case 3:
 			{
-				InvalidateRect(GetParent(hWnd), NULL, FALSE);
-
 				//::MessageBox(hwnd_LogWin, L"PRZYPOMNIJ HAS£O", L"", MB_OK);
 				flag_LogWin = 'c';
-				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
 				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
 
 				ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
@@ -805,6 +808,8 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 				show_red_allert = L"nic";
 
+				InvalidateRect(hwnd_LogWin, NULL, true);
+				UpdateWindow(hwnd_LogWin);
 
 			}break;
 
@@ -823,11 +828,8 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 			case 2:
 			{
-				InvalidateRect(GetParent(hWnd), NULL, FALSE);
-
 				//::MessageBox(hwnd_LogWin, L"LOGUJ", L"", MB_OK);
 				flag_LogWin = 'a';
-				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
 				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
 
 				ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
@@ -836,16 +838,15 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 				show_red_allert = L"nic";
 
+				InvalidateRect(hwnd_LogWin, NULL, true);
+				UpdateWindow(hwnd_LogWin);
 
 			}break;
 
 			case 3:
 			{
-				InvalidateRect(GetParent(hWnd), NULL, FALSE);
-
 				//::MessageBox(hwnd_LogWin, L"PRZYPOMNIJ HAS£O", L"", MB_OK);
 				flag_LogWin = 'c';
-				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
 				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
 
 				ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
@@ -854,6 +855,8 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 				show_red_allert = L"nic";
 
+				InvalidateRect(hwnd_LogWin, NULL, true);
+				UpdateWindow(hwnd_LogWin);
 
 			}break;
 			}// switch (wParam)
@@ -872,11 +875,8 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 			case 2:
 			{
-				InvalidateRect(GetParent(hWnd), NULL, FALSE);
-
 				//::MessageBox(hwnd_LogWin, L"LOGUJ", L"", MB_OK);
 				flag_LogWin = 'a';
-				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
 				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
 
 				ShowWindow(hwnd_LogWin_EditOrganization, SW_HIDE);
@@ -884,17 +884,16 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 				ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
 
 				show_red_allert = L"nic";
-
+				
+				InvalidateRect(hwnd_LogWin, NULL, true);
+				UpdateWindow(hwnd_LogWin);
 
 			}break;
 
 			case 3:
 			{
-				InvalidateRect(GetParent(hWnd), NULL, FALSE);
-
 				//::MessageBox(hwnd_LogWin, L"UTWÓRZ KONTO", L"", MB_OK);
 				flag_LogWin = 'b';
-				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
 				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
 
 				ShowWindow(hwnd_LogWin_EditOrganization, SW_SHOW);
@@ -903,6 +902,8 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 				show_red_allert = L"nic";
 
+				InvalidateRect(hwnd_LogWin, NULL, true);
+				UpdateWindow(hwnd_LogWin);
 
 			}break;
 			}// switch (wParam)

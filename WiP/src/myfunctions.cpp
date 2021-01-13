@@ -44,18 +44,33 @@ std::string f_wchar_t2str (wchar_t text[512])
     return str_login_text;
 }
 
-char* tr(char* str)
+int f_wchar_t_lenght(wchar_t text[])
 {
-	static char buff[256];
-	char cp[] = "\245\206\251\210\344\242\230\276\253\244\217\250\235\343\340\227\275\215¹æê³ñóœ¿Ÿ¥ÆÊ£ÑÓŒ¯";
-	if (strlen(str) >= sizeof(buff)) return str;
-	char* bf = buff;
-	while (*str)
+	int i;
+	for (i = 0; i <= 511; i++)
 	{
-		char* pos = strchr(cp + 18, *str);
-		*(bf++) = pos ? *(pos - 18) : *str;
-		++str;
+		 if (text[i] == 0)
+         {
+             break;
+         }
 	}
-	*bf = 0;
-	return buff;
+	return i;
+}
+
+int f_at_in_login(wchar_t text[])
+{
+    int i;
+    for (i = 0; i <= 511; i++)
+    {
+        if (text[i] == 64)
+        {
+            break;
+        }
+        else if (text[i] == 0)
+        {
+            i = -1;
+            break;
+        }
+    }
+    return i;
 }
