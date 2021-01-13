@@ -20,7 +20,7 @@ HFONT hFont;
 HBRUSH hBrush;
 
 char flag_LogWin = 'a'; //a-login, b-registration, c-password_reminder
-std::string show_red_allert = "nic"; //login, password, organization, all
+std::wstring show_red_allert = L"nic"; //login, password, organization, all
 
 int red = 0;
 int my_counter = 0;
@@ -380,17 +380,24 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_TIMER:
 	{
-		printf("WM_TIMER %d", wParam);
-		std::cout << "\n";
+		/*
+		case WM_ERASEBKGND:
+		{
+			return FALSE;
+		}break;//WM_ERASEBKGND
+		*/
 
 		switch (wParam)
 		{
 		case 1001:
 		{
-			InvalidateRect(GetParent(hWnd), NULL, FALSE);
+
 			std::cout << "wylaczamy zegar\n";
 			KillTimer(hWnd, 1001);
-			show_red_allert = "nic";
+			show_red_allert = L"nic";
+
+			InvalidateRect(GetParent(hWnd), NULL, FALSE);
+
 		};
 		}
 	}break;//WM_TIMER
@@ -419,6 +426,7 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			hBrush = ::CreateSolidBrush(RGB(0, 72, 0));
 
 			RECT rc;
+
 			SetRect(&rc, ((windx - button_size_x) / 2), 50, ((windx - button_size_x) / 2) + button_size_x, 75);
 			//::FillRect(ps.hdc, &rc, hBrush);
 			hFont = CreateFont(20, 0, 0, 0, 300, FALSE, FALSE, FALSE, DEFAULT_CHARSET, NULL, NULL, NULL, NULL, TEXT("Calibri"));
@@ -430,12 +438,11 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			SetRect(&rc, ((windx - button_size_x) / 2), 100, ((windx - button_size_x) / 2) + button_size_x, 125);
 			DrawText(ps.hdc, L"Podaj has³o:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
-			if (show_red_allert != "nic")
+			if (show_red_allert != L"nic")
 			{
 				SetTextColor(ps.hdc, RGB(255, 43, 0));
 				SetRect(&rc, ((windx - button_size_x) / 2), 150, ((windx - button_size_x) / 2) + button_size_x, 175);
-				std::wstring wsRed_allert_text(show_red_allert.begin(), show_red_allert.end());
-				const wchar_t* szRed_allert_text = wsRed_allert_text.c_str();
+				const wchar_t* szRed_allert_text = show_red_allert.c_str();
 				DrawText(ps.hdc, szRed_allert_text, -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 			}
 
@@ -708,6 +715,8 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 			{
 			case 1:
 			{
+				UpdateWindow(hwnd_LogWin);
+				InvalidateRect(GetParent(hWnd), NULL, FALSE);
 
 				//::MessageBox(hwnd_LogWin, L"Tutaj bedzie proba logowania", L"", MB_OK);
 
@@ -718,10 +727,6 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 				GetWindowText(hwnd_LogWin_EditPassword, password_text, 512);
 
 				//if (str_password_text = "")
-
-
-
-				std::string napis;
 
 				//concatenating strings and replacing std :: string with LPCWSTR
 				std::string comm_text("Login: " + f_wchar_t2str(login_text) + "\n" + "Password: " + f_wchar_t2str(password_text));
@@ -734,7 +739,7 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 				SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
 				std::cout << "Resetujemy zegar \n";
 				std::cout << "Wlaczamy napis \n";
-				show_red_allert = "login";
+				show_red_allert = L"login ¹œæ";
 
 
 				for (int i = 0; i <= 511; i++)
@@ -746,14 +751,24 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 					else if (login_text[i+1] == 0)
 						break;
 				}
-				//           to jest 8 od 165
-				std::cout << "\245 \n"; //¹ 261  165
-				std::cout << "\206 \n"; //æ 263  134
+				//           to jest 8 od 165     wiapi
+				std::cout << "\245 \n"; //¹       261      165
+				std::cout << "\206 \n"; //æ       263      134
+				
+
+				std::string comm_text1="To\245, \261, \165";
+				//std::wstring ws_comm_text1(comm_text1.begin(), comm_text1.end());
+				std::wstring ws_comm_text1=L"To ¹ œæ";
+				LPCWSTR wide_string1 = ws_comm_text1.c_str();
+
+				::MessageBox(hwnd_LogWin, wide_string1, L"nowe", MB_OK);
 				
 				InvalidateRect(GetParent(hWnd), NULL, FALSE);
 
 				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_HIDE);
 				ShowWindow(hwnd_LogWin_CheckBoxLoginData, SW_SHOW);
+
+
 
 			}break;
 
@@ -770,7 +785,7 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 				ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
 
-				show_red_allert = "nic";
+				show_red_allert = L"nic";
 
 
 			}break;
@@ -788,7 +803,7 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 				ShowWindow(hwnd_LogWin_EditPassword, SW_HIDE);
 
-				show_red_allert = "nic";
+				show_red_allert = L"nic";
 
 
 			}break;
@@ -819,7 +834,7 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 				ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
 
-				show_red_allert = "nic";
+				show_red_allert = L"nic";
 
 
 			}break;
@@ -837,7 +852,7 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 				ShowWindow(hwnd_LogWin_EditPassword, SW_HIDE);
 
-				show_red_allert = "nic";
+				show_red_allert = L"nic";
 
 
 			}break;
@@ -868,7 +883,7 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 				ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
 
-				show_red_allert = "nic";
+				show_red_allert = L"nic";
 
 
 			}break;
@@ -886,7 +901,7 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 				ShowWindow(hwnd_LogWin_EditPassword, SW_SHOW);
 
-				show_red_allert = "nic";
+				show_red_allert = L"nic";
 
 
 			}break;
