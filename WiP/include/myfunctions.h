@@ -6,8 +6,8 @@
 
 /*see console.cpp for function definitions */
 //extern void CreateConsole(); 
-extern std::string T2str(TCHAR x[]);
-extern void printT(TCHAR x[]);
+extern std::string f_TCHAR2str(TCHAR x[]);
+extern void f_printT(TCHAR x[]);
 //extern void loadImages(HBITMAP img);
 
 /*function that prints everything (! except CHAR!) to the console.*/
@@ -24,5 +24,8 @@ inline void my_bzero(T& s) {
 }
 
 
-HFONT myfont(int font_size, LPCWSTR font_type);
+HFONT f_myfont(int font_size, LPCWSTR font_type);
 
+std::string f_wchar_t2str(wchar_t text[512]);
+
+char* tr(char* str);
