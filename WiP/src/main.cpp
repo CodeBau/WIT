@@ -20,7 +20,7 @@ HFONT hFont;
 HBRUSH hBrush;
 
 char flag_LogWin = 'a'; //a-login, b-registration, c-password_reminder
-std::wstring show_red_allert = L"nic"; //login, password, organization, all
+std::wstring show_red_allert = L"nic"; //red allert c
 
 int red = 0;
 int my_counter = 0;
@@ -410,7 +410,7 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		switch (flag_LogWin)
 		{
-		case 'a':
+		case 'a': //login
 		{
 			PAINTSTRUCT ps;
 			BeginPaint(hWnd, &ps);
@@ -433,15 +433,15 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (show_red_allert != L"nic")
 			{
 				SetTextColor(ps.hdc, RGB(255, 43, 0));
-				SetRect(&rc, ((windx - button_size_x) / 2), 150, ((windx - button_size_x) / 2) + button_size_x, 175);
+				SetRect(&rc, ((windx - edit_size_x) / 2), 150, ((windx - edit_size_x) / 2) + edit_size_x, 175);
 				const wchar_t* szRed_allert_text = show_red_allert.c_str();
 				DrawText(ps.hdc, szRed_allert_text, -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 			}
-
+			EndPaint(hWnd, &ps);
 
 		}break;
 
-		case 'b':
+		case 'b': // registration
 		{
 			PAINTSTRUCT ps;
 			BeginPaint(hWnd, &ps);
@@ -462,10 +462,18 @@ LRESULT CALLBACK LogWin(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			SetRect(&rc, ((windx - button_size_x) / 2), 150, ((windx - button_size_x) / 2) + button_size_x, 175);
 			DrawText(ps.hdc, L"Podaj nazwê organizacji:", -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+
+			if (show_red_allert != L"nic")
+			{
+				SetTextColor(ps.hdc, RGB(255, 43, 0));
+				SetRect(&rc, ((windx - edit_size_x) / 2), 200, ((windx - edit_size_x) / 2) + edit_size_x, 225);
+				const wchar_t* szRed_allert_text = show_red_allert.c_str();
+				DrawText(ps.hdc, szRed_allert_text, -1, &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			}
 			EndPaint(hWnd, &ps);
 		}break;
 
-		case 'c':
+		case 'c': //c-password_reminder
 		{
 			PAINTSTRUCT ps;
 			BeginPaint(hWnd, &ps);
@@ -701,7 +709,7 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	{
 		switch (flag_LogWin)
 		{
-		case 'a':
+		case 'a': //login
 		{
 			switch (wParam)
 			{
@@ -711,8 +719,6 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 				wchar_t login_text[512];
 				GetWindowText(hwnd_LogWin_EditLogin, login_text, 512);
-				std::wcout << login_text << "\n";
-				std::wcout << f_at_in_login(login_text) << "\n";
 				wchar_t password_text[512];
 				GetWindowText(hwnd_LogWin_EditPassword, password_text, 512);
 
@@ -767,10 +773,10 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 				//std::cout << "\206 \n"; //æ       263      134
 				
 
-				std::string comm_text1="To\245, \261, \165";
+				//std::string comm_text1="To\245, \261, \165";
 				//std::wstring ws_comm_text1(comm_text1.begin(), comm_text1.end());
-				std::wstring ws_comm_text1=L"To ¹ œæ";
-				LPCWSTR wide_string1 = ws_comm_text1.c_str();
+				//std::wstring ws_comm_text1=L"To ¹ œæ";
+				//LPCWSTR wide_string1 = ws_comm_text1.c_str();
 
 				//::MessageBox(hwnd_LogWin, wide_string1, L"nowe", MB_OK);
 
@@ -816,13 +822,66 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 			}// switch (wParam)
 		}break;
 
-		case 'b':
+		case 'b': // registration
 		{
 			switch (wParam)
 			{
 			case 1:
 			{
-				::MessageBox(hwnd_LogWin, L"Tutaj bêdzie próba utworzenia konta", L"", MB_OK);
+				//::MessageBox(hwnd_LogWin, L"Tutaj bêdzie próba utworzenia konta", L"", MB_OK);
+				wchar_t login_text[512];
+				GetWindowText(hwnd_LogWin_EditLogin, login_text, 512);
+				wchar_t password_text[512];
+				GetWindowText(hwnd_LogWin_EditPassword, password_text, 512);
+				wchar_t organization_text[512];
+				GetWindowText(hwnd_LogWin_EditOrganization, organization_text, 512);
+
+				if (f_wchar_t_lenght(login_text) != 0 && f_wchar_t_lenght(password_text) != 0 && f_wchar_t_lenght(organization_text) != 0)
+				{
+					if (f_at_in_login(login_text) == -1) //login ist just login
+					{
+						SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
+						show_red_allert = L"login jest loginem";
+
+					}
+					else if (f_at_in_login(login_text) != -1) //login ist e-mail
+					{
+						int login_lenght = f_at_in_login(login_text);
+						for (int i = 0; i <= login_lenght; i++)
+
+
+							SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
+						show_red_allert = L"login jest mailem";
+					}
+				}
+				else if (f_wchar_t_lenght(login_text) == 0 && f_wchar_t_lenght(password_text) == 0 && f_wchar_t_lenght(organization_text)==0)
+				{
+					SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
+					show_red_allert = L"Uzupe³nij pola";
+				}
+				else if ((f_wchar_t_lenght(login_text) != 0 && f_wchar_t_lenght(password_text) == 0 && f_wchar_t_lenght(organization_text) == 0) || (f_wchar_t_lenght(login_text) == 0 && f_wchar_t_lenght(password_text) != 0 && f_wchar_t_lenght(organization_text) == 0) || (f_wchar_t_lenght(login_text) == 0 && f_wchar_t_lenght(password_text) == 0 && f_wchar_t_lenght(organization_text) != 0))
+				{
+					SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
+					show_red_allert = L"Uzupe³nij brakuj¹ce pola";
+				}
+				else if (f_wchar_t_lenght(login_text) == 0 && f_wchar_t_lenght(password_text) != 0 && f_wchar_t_lenght(organization_text) != 0)
+				{
+					SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
+					show_red_allert = L"Uzupe³nij login";
+				}
+				else if (f_wchar_t_lenght(login_text) != 0 && f_wchar_t_lenght(password_text) == 0 && f_wchar_t_lenght(organization_text) != 0)
+				{
+					SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
+					show_red_allert = L"Uzupe³nij has³o";
+				}
+				else if (f_wchar_t_lenght(login_text) != 0 && f_wchar_t_lenght(password_text) != 0 && f_wchar_t_lenght(organization_text) == 0)
+				{
+					SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
+					show_red_allert = L"Uzupe³nij nazwê organizacji";
+				}
+
+				InvalidateRect(hwnd_LogWin, NULL, true);
+				UpdateWindow(hwnd_LogWin);
 
 			}break;
 
@@ -863,7 +922,7 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 		}break;
 
-		case 'c':
+		case 'c': // 
 		{
 			switch (wParam)
 			{
