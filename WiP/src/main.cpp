@@ -842,8 +842,9 @@ LRESULT CALLBACK LogWinButton(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 					{
 						SetTimer(hwnd_LogWin, 1001, 2500, nullptr);
 						show_red_allert = L"Wszystko siê zgadza mo¿na zak³adaæ organizacjê";
-						f_sql_create_table("organizations");
-
+						f_sql_create_organizations_table();
+						f_sql_check_organization(hwnd_LogWin_EditOrganization);
+						f_sql_insert_organization(hwnd_LogWin_EditOrganization);
 					}
 				}
 				else if (f_wchar_t_lenght(login_text) == 0 && f_wchar_t_lenght(password_text) == 0 && f_wchar_t_lenght(organization_text) == 0)
