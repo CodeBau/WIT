@@ -1,13 +1,4 @@
-#include <tchar.h>
-#include <windows.h>
-#include <iostream>
-#include <string>
-#include <locale.h>
-
 #include "../include/myfunctions.h"
-
-
-
 
 /*function to convert TCHAR to a string*/
 std::string f_TCHAR2str(TCHAR x[])
