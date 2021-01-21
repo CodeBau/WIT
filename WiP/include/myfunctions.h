@@ -4,19 +4,6 @@
 #include <windows.h>
 #include <iostream>
 
-/*see console.cpp for function definitions */
-//extern void CreateConsole(); 
-extern std::string f_TCHAR2str(TCHAR x[]);
-extern void f_printT(TCHAR x[]);
-//extern void loadImages(HBITMAP img);
-
-/*function that prints everything (! except CHAR!) to the console.*/
-template <typename T>
-void print(const T& x)
-{
-	std::cout << x << '\n';
-}
-
 /*my_common.h*/
 template<class T>
 inline void my_bzero(T& s) {
@@ -25,9 +12,10 @@ inline void my_bzero(T& s) {
 
 HFONT f_myfont(int font_size, LPCWSTR font_type);
 
-std::string f_wchar_t2str(wchar_t text[512]);
-
-char* tr(char* str);
-
 int f_wchar_t_lenght(wchar_t text[]);
+
 int f_at_in_login(wchar_t text[]);
+
+bool isInsideRect(RECT& rc, LONG x, LONG y);
+
+void font_and_text_set(int x, int y, PAINTSTRUCT& ps, LPCWSTR text, RECT rc);

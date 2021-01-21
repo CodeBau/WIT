@@ -161,6 +161,7 @@
     <ClInclude Include="include\mysql.h" />
     <ClInclude Include="include\mystaf.h" />
     <ClInclude Include="include\mystaf_example.h" />
+    <ClInclude Include="include\myvariable.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

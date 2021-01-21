@@ -88,8 +88,8 @@ void f_sql_check_organization(HWND hWnd)
 	WCHAR name[512]{ 0 };
 	int lenUser = SendMessage(hWnd, WM_GETTEXT, 512, (LPARAM)name);
 
-	//std::string query = "SELECT organization_name FROM organizations WHERE organization_name='" + f_sql_str2Utf8(&mysql, name, lenUser) +"'";
-	std::string query = "SELECT organization_name FROM organizations WHERE organization_name='nowa'";
+	std::string query = "SELECT organization_name FROM organizations WHERE organization_name='" + f_sql_str2Utf8(&mysql, name, lenUser) +"'";
+	//std::string query = "SELECT organization_name FROM organizations WHERE organization_name='nowa'";
 
 	std::cout << query << std::endl;
 	qstate = mysql_query(&mysql, query.c_str());
