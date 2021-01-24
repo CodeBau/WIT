@@ -79,8 +79,6 @@ void LogWindow::create()
 	m_centralButton.create((windx - button_size_x) / 2, (windy - 6 * window_grid), button_size_x, button_size_y,L"zaloguj", hwnd(), (HMENU)ChildId::CenterButton, normal_font);
 	m_leftButton.create(15,  340, 100, 15, L"utwórz konto", hwnd(), (HMENU)ChildId::LeftButton, small_font);
 	m_rightButton.create(130 ,340, 100, 15, L"przypomnij has³o", hwnd(), (HMENU)ChildId::RightButton, small_font);
-
-	myRegWin.create();
 }
 
 void LogWindow::OnDestroy() {
@@ -200,8 +198,9 @@ void LogWindow::OnCommand(WPARAM wParam, LPARAM lParam) {
 		case ChildId::LeftButton:
 		{
 			std::cout << "LeftButton \n";
-
+			myRegWin.create();
 			ShowWin(myRegWin.hwnd());
+			HideWin(hwnd());
 
 		} break;//ChildId::LeftButton: 
 
