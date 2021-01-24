@@ -148,20 +148,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\LogWindow.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MyBitmap.cpp" />
+    <ClCompile Include="src\Buttons.cpp" />
     <ClCompile Include="src\MyFlags.cpp" />
     <ClCompile Include="src\myfunctions.cpp" />
     <ClCompile Include="src\mysql.cpp" />
+    <ClCompile Include="src\MyWindowBase.cpp" />
+    <ClCompile Include="src\RegWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\LogWindow.h" />
     <ClInclude Include="include\MyBitmap.h" />
+    <ClInclude Include="include\Buttons.h" />
     <ClInclude Include="include\MyFlags.h" />
     <ClInclude Include="include\myfunctions.h" />
     <ClInclude Include="include\mysql.h" />
     <ClInclude Include="include\mystaf.h" />
     <ClInclude Include="include\mystaf_example.h" />
     <ClInclude Include="include\myvariable.h" />
+    <ClInclude Include="include\MyWindowBase.h" />
+    <ClInclude Include="include\RegWindow.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

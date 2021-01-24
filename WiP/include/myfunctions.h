@@ -18,4 +18,4 @@ int f_at_in_login(wchar_t text[]);
 
 bool isInsideRect(RECT& rc, LONG x, LONG y);
 
-void font_and_text_set(int x, int y, PAINTSTRUCT& ps, LPCWSTR text, RECT rc);
+inline void font_and_text_set(int x, int y, PAINTSTRUCT& ps, LPCWSTR text, RECT rc) {}

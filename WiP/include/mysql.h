@@ -1,8 +1,12 @@
 #pragma once
 
-#include <mysql.h>
+#include <Windows.h>
+// #include <mysql.h>
 #include <vector>
 #include <string>
+
+
+class MYSQL;
 
 std::string f_sql_str2Utf8(MYSQL* mysql, WCHAR* wStr, int wLen);
 
