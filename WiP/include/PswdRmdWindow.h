@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-class LogWindow : public MyWindowBase
+class PswdRmdWindow : public MyWindowBase
 {
 	using Base = MyWindowBase;
 public:
@@ -17,12 +17,12 @@ public:
 		CenterButton,
 		LeftButton,
 		RightButton,
-		LoginCheckBox,
-		AutoLoginCheckBox,
 		Timer,
 	};
 
-	static const int TimerId = 1001;
+	static const int TimerId = 1003;
+
+	void ShowWin(bool istrue);
 
 private:
 	virtual void OnDestroy() override;
@@ -30,21 +30,11 @@ private:
 
 	void OnPaint(PAINTSTRUCT& ps);
 	void OnCommand(WPARAM wParam, LPARAM lParam);
-	void OnCommand_Login(WPARAM wParam, LPARAM lParam);
-	void OnCommand_Registration(WPARAM wParam, LPARAM lParam);
-	void OnCommand_PasswordReminder(WPARAM wParam, LPARAM lParam);
 
 	bool my_IsDlgButtonChecked(ChildId id) { return IsDlgButtonChecked(hwnd(), static_cast<int>(id)); }
 	void my_CheckDlgButton(ChildId id, bool checked) { CheckDlgButton(hwnd(), static_cast<int>(id), checked ? BST_CHECKED : BST_UNCHECKED); }
 
-	HWND hwnd_ServerLogWin = nullptr;
-	HWND hwnd_ServerLogWin_EditLogin = nullptr;
-	HWND hwnd_ServerLogWin_EditPassword = nullptr;
-	HWND hwnd_LogWin_EditLogin = nullptr;
-	HWND hwnd_LogWin_EditPassword = nullptr;
-	HWND hwnd_LogWin_EditOrganization = nullptr;
-	HWND hwnd_LogWin_CheckBoxLoginData = nullptr;
-	HWND hwnd_LogWin_CheckBoxAutoLogin = nullptr;
+	HWND hwnd_PswdRmdWin_EditLogin = nullptr;
 
 	Buttons m_centralButton;
 	Buttons m_leftButton;

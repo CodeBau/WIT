@@ -156,6 +156,7 @@
     <ClCompile Include="src\myfunctions.cpp" />
     <ClCompile Include="src\mysql.cpp" />
     <ClCompile Include="src\MyWindowBase.cpp" />
+    <ClCompile Include="src\PswdRmdWindow.cpp" />
     <ClCompile Include="src\RegWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -169,6 +170,7 @@
     <ClInclude Include="include\mystaf_example.h" />
     <ClInclude Include="include\myvariable.h" />
     <ClInclude Include="include\MyWindowBase.h" />
+    <ClInclude Include="include\PswdRmdWindow.h" />
     <ClInclude Include="include\RegWindow.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

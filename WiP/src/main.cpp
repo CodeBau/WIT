@@ -16,6 +16,7 @@
 
 #include "../include/LogWindow.h"
 #include "../include/RegWindow.h"
+#include "../include/PswdRmdWindow.h"
 
 //  Declare Windows procedure
 
@@ -23,7 +24,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 {
 	LogWindow myLogWin;
 	myLogWin.create();
-	myLogWin.ShowWin(myLogWin.hwnd());
+	
+	RegWindow myRegWin;
+	myRegWin.create();
+	
+	PswdRmdWindow myPswdRmdWin;
+	myPswdRmdWin.create();
+
+	myLogWin.LogWinRegWinRef =  & myRegWin;
+
+
+	myLogWin.ShowWin(true);
+	myRegWin.ShowWin(false); 
+	myPswdRmdWin.ShowWin(false);
 
 	// Main message loop:
 	MSG msg;

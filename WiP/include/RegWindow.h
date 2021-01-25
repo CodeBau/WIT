@@ -22,9 +22,8 @@ public:
 
 	static const int TimerId = 1002;
 
-	void ShowWin(HWND hWnd);
+	void ShowWin(bool istrue);
 
-	void HideWin(HWND hWnd);
 
 
 private:

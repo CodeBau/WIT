@@ -5,6 +5,9 @@
 #include <string>
 #include <iostream>
 
+class LogWindow;
+class RegWindow;
+
 class LogWindow : public MyWindowBase
 {
 	using Base = MyWindowBase;
@@ -23,13 +26,13 @@ public:
 		Timer,
 	};
 
+	RegWindow LogWinRegWinRef;
+
 	static const int TimerId = 1001;
 
-	RegWindow myRegWin;
+	void ShowWin(bool istrue);
 
-	void ShowWin(HWND hWnd);
-
-	void HideWin(HWND hWnd);
+	void take(RegWindow& LogWinRegWinfortake);
 
 private:
 	virtual void OnDestroy() override;

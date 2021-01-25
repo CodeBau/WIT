@@ -236,14 +236,17 @@ void RegWindow::OnPaint(PAINTSTRUCT& ps) {
 	}
 }
 
-void RegWindow::ShowWin(HWND hWnd)
+void RegWindow::ShowWin(bool istrue)
 {
-	ShowWindow(hWnd, SW_SHOW);
-	UpdateWindow(hWnd);
+	if (istrue == true) 
+	{
+		ShowWindow(hwnd(), SW_SHOW);
+		UpdateWindow(hwnd());
+	}
+	else if (istrue == false)
+	{
+		ShowWindow(hwnd(), SW_HIDE);
+		UpdateWindow(hwnd());
+	}
 }
-
-void RegWindow::HideWin(HWND hWnd)
-{
-	ShowWindow(hWnd, SW_HIDE);
-	UpdateWindow(hWnd);
-}
+ 

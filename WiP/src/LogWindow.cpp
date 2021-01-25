@@ -195,16 +195,14 @@ void LogWindow::OnCommand(WPARAM wParam, LPARAM lParam) {
 			my_InvalidateRect();
 		} break;//CenterButton
 
-		case ChildId::LeftButton:
+		case ChildId::LeftButton://Reg
 		{
 			std::cout << "LeftButton \n";
-			myRegWin.create();
-			ShowWin(myRegWin.hwnd());
-			HideWin(hwnd());
+			LogWinRegWinRef.ShowWin(true);
 
 		} break;//ChildId::LeftButton: 
 
-		case ChildId::RightButton:
+		case ChildId::RightButton://PswdRmd
 		{
 			std::cout << "RightButton \n";
 
@@ -256,14 +254,23 @@ void LogWindow::OnPaint(PAINTSTRUCT& ps) {
 		
 }
 
-void LogWindow::ShowWin(HWND hWnd)
+void LogWindow::ShowWin(bool istrue)
 {
-	ShowWindow(hWnd, SW_SHOW);
-	UpdateWindow(hWnd);
+	if (istrue == true)
+	{
+		ShowWindow(hwnd(), SW_SHOW);
+		UpdateWindow(hwnd());
+	}
+	else if (istrue == false)
+	{
+		ShowWindow(hwnd(), SW_HIDE);
+		UpdateWindow(hwnd());
+	}
 }
 
-void LogWindow::HideWin(HWND hWnd)
+void LogWindow::take(RegWindow& LogWinRegWinfortake)
 {
-	ShowWindow(hWnd, SW_HIDE);
-	UpdateWindow(hWnd);
+	//LogWinRegWinRef = LogWinRegWinfortake;
 }
+
+
